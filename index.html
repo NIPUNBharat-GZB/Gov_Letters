@@ -1,0 +1,773 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Letter Registry — Education Department</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+Devanagari:wght@500;600;700&family=Noto+Sans+Devanagari:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+<style>
+:root{
+  --ink:#132a3d; --ink-soft:#3d5468; --ink-faint:#7c8fa0;
+  --paper:#f3f1ec; --paper-raised:#ffffff; --rule:#e2dccf; --rule-soft:#efeae0;
+  --state:#8a3d1f; --state-soft:#f6e6da; --state-mark:#c2562a;
+  --district:#1f5c4a; --district-soft:#dcefe6; --district-mark:#1f8a6b;
+  --blue:#2a7fb8; --blue-soft:#e3f0f9;
+  --gold:#b8842c; --gold-soft:#f8ecd2;
+  --violet:#6a4fb3; --violet-soft:#ece7f8;
+  --danger:#b03a3a; --danger-soft:#fbe6e4;
+  --shadow-sm:0 1px 3px rgba(19,42,61,.06), 0 2px 10px rgba(19,42,61,.05);
+  --shadow-md:0 12px 28px rgba(19,42,61,.12);
+  --shadow-lg:0 24px 48px rgba(19,42,61,.18);
+}
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+body{
+  background:var(--paper);color:var(--ink);
+  font-family:'Noto Sans Devanagari','Noto Sans',system-ui,sans-serif;line-height:1.6;
+  -webkit-font-smoothing:antialiased;min-height:100vh;
+}
+h1,h2,h3,.serif{font-family:'Noto Serif Devanagari','Noto Sans Devanagari',serif;}
+svg{display:block;}
+button{font-family:inherit;}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
+.fade-up{animation:fadeUp .45s ease both;}
+.d1{animation-delay:.05s;} .d2{animation-delay:.1s;} .d3{animation-delay:.15s;} .d4{animation-delay:.2s;}
+
+/* ---------- Top strip & masthead ---------- */
+.top-strip{background:var(--ink);color:#dce6ec;padding:9px 28px;border-bottom:2px solid var(--gold);}
+.top-strip-inner{max-width:1280px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;}
+.dept-label{font-size:.76rem;letter-spacing:.6px;text-transform:uppercase;display:flex;align-items:center;gap:8px;font-weight:500;}
+.dept-label .dept-logo{height:30px;width:30px;object-fit:contain;border-radius:50%;background:#fdfcfa;padding:2px;}
+.nipun-badge{display:flex;align-items:center;gap:8px;}
+.nipun-badge img{height:44px;width:auto;}
+.nipun-badge .nipun-fallback{width:36px;height:36px;border-radius:50%;background:var(--gold);color:var(--ink);font-size:.52rem;font-weight:700;line-height:1.15;text-align:center;display:none;align-items:center;justify-content:center;}
+.nipun-badge .nipun-text{font-size:.74rem;color:#dce6ec;}
+
+.masthead{background:var(--paper-raised);border-bottom:1px solid var(--rule);padding:18px 28px;}
+.masthead-inner{max-width:1280px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;}
+.brand{display:flex;align-items:center;gap:14px;}
+.brand-mark{width:46px;height:46px;border-radius:50%;background:conic-gradient(from 180deg,var(--state-mark),var(--gold),var(--district-mark),var(--blue),var(--state-mark));display:flex;align-items:center;justify-content:center;}
+.brand-mark .inner{width:37px;height:37px;border-radius:50%;background:#fff;display:flex;align-items:center;justify-content:center;}
+.masthead h1{font-size:1.55rem;margin:0;line-height:1.2;}
+.masthead p{margin:0;color:var(--ink-soft);font-size:.88rem;}
+.meta{display:flex;align-items:center;gap:12px;font-size:.8rem;color:var(--ink-faint);}
+.icon-btn{background:#fff;border:1px solid var(--rule);color:var(--ink-soft);padding:7px 14px;border-radius:20px;cursor:pointer;font-size:.82rem;display:inline-flex;align-items:center;gap:6px;transition:all .15s;}
+.icon-btn:hover{border-color:var(--blue);color:var(--blue);}
+.icon-btn svg{width:14px;height:14px;}
+.icon-btn.spinning svg{animation:spin .8s linear infinite;}
+
+main{max-width:1280px;margin:0 auto;padding:24px 28px 80px;}
+
+/* ---------- Global filter bar ---------- */
+.filterbar{display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end;background:var(--paper-raised);border:1px solid var(--rule);border-radius:12px;padding:14px 18px;margin-bottom:18px;box-shadow:var(--shadow-sm);}
+.filterbar .fb-title{font-size:.8rem;font-weight:600;color:var(--ink-soft);display:flex;align-items:center;gap:6px;margin-right:6px;align-self:center;}
+.filterbar .fb-title svg{width:16px;height:16px;color:var(--blue);}
+.filter-field{display:flex;flex-direction:column;gap:4px;}
+.filter-field label{font-size:.74rem;color:var(--ink-faint);font-weight:500;}
+.filter-field select,.filter-field input{font-family:inherit;font-size:.9rem;padding:8px 12px;border:1px solid var(--rule);border-radius:8px;background:var(--paper);color:var(--ink);min-width:140px;}
+.filter-field input{min-width:220px;}
+.filter-field select:focus,.filter-field input:focus{outline:2px solid var(--blue);outline-offset:1px;}
+.reset-btn{background:none;border:1px solid var(--rule);color:var(--ink-soft);padding:8px 16px;border-radius:8px;cursor:pointer;font-size:.86rem;height:39px;transition:all .15s;}
+.reset-btn:hover{border-color:var(--danger);color:var(--danger);}
+.result-count{font-size:.85rem;color:var(--ink-soft);margin-left:auto;align-self:center;font-weight:500;}
+
+/* ---------- KPI cards ---------- */
+.kpis{display:grid;grid-template-columns:repeat(5,1fr);gap:14px;margin-bottom:18px;}
+@media(max-width:1000px){.kpis{grid-template-columns:repeat(3,1fr);}}
+@media(max-width:620px){.kpis{grid-template-columns:repeat(2,1fr);}}
+.kpi{position:relative;background:var(--paper-raised);border:1px solid var(--rule);border-radius:12px;padding:16px 16px 14px;box-shadow:var(--shadow-sm);overflow:hidden;cursor:pointer;transition:transform .18s,box-shadow .18s;text-align:left;}
+.kpi:hover{transform:translateY(-3px);box-shadow:var(--shadow-md);}
+.kpi::before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--accent);}
+.kpi .k-top{display:flex;align-items:center;justify-content:space-between;}
+.kpi .k-label{font-size:.78rem;color:var(--ink-soft);font-weight:500;}
+.kpi .k-icon{width:32px;height:32px;border-radius:9px;display:flex;align-items:center;justify-content:center;background:var(--accent-soft);color:var(--accent);}
+.kpi .k-icon svg{width:17px;height:17px;}
+.kpi .k-num{font-family:'Noto Serif Devanagari',serif;font-size:1.9rem;font-weight:700;line-height:1.1;margin-top:8px;}
+.kpi .k-sub{font-size:.74rem;color:var(--ink-faint);margin-top:2px;}
+.kpi.total{--accent:var(--gold);--accent-soft:var(--gold-soft);}
+.kpi.state{--accent:var(--state-mark);--accent-soft:var(--state-soft);}
+.kpi.district{--accent:var(--district-mark);--accent-soft:var(--district-soft);}
+.kpi.month{--accent:var(--blue);--accent-soft:var(--blue-soft);}
+.kpi.nodate{--accent:var(--danger);--accent-soft:var(--danger-soft);}
+
+/* ---------- Chart cards ---------- */
+.charts{display:grid;grid-template-columns:1.5fr 1fr 1fr;gap:14px;margin-bottom:22px;}
+@media(max-width:1000px){.charts{grid-template-columns:1fr 1fr;} .charts .card.wide{grid-column:1/-1;}}
+@media(max-width:620px){.charts{grid-template-columns:1fr;}}
+.card{background:var(--paper-raised);border:1px solid var(--rule);border-radius:12px;padding:16px 18px;box-shadow:var(--shadow-sm);min-width:0;}
+.card h3{font-size:.98rem;margin:0;}
+.card .card-sub{font-size:.75rem;color:var(--ink-faint);margin:0 0 12px;}
+
+/* column chart */
+.colchart{display:flex;align-items:flex-end;gap:6px;height:250px;padding-top:18px;border-bottom:1px solid var(--rule);position:relative;}
+.colchart .col{flex:1;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;height:100%;cursor:pointer;position:relative;min-width:0;}
+.colchart .stack{width:100%;max-width:34px;display:flex;flex-direction:column-reverse;gap:2px;}
+.colchart .seg{width:100%;transition:filter .15s;}
+.colchart .seg.s{background:var(--state-mark);}
+.colchart .seg.d{background:var(--district-mark);}
+.colchart .stack .seg:last-child{border-radius:4px 4px 0 0;}
+.colchart .col:hover .seg{filter:brightness(1.12);}
+.colchart .col .v{font-size:.72rem;color:var(--ink-soft);font-weight:600;margin-bottom:3px;}
+.colchart-x{display:flex;gap:6px;margin-top:6px;}
+.colchart-x span{flex:1;text-align:center;font-size:.68rem;color:var(--ink-faint);line-height:1.2;min-width:0;overflow:hidden;}
+.legend{display:flex;gap:14px;font-size:.75rem;color:var(--ink-soft);margin-bottom:4px;}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:5px;vertical-align:-1px;}
+
+/* horizontal bars */
+.hbars{display:flex;flex-direction:column;gap:9px;}
+.hbar{display:grid;grid-template-columns:96px 1fr 30px;align-items:center;gap:8px;cursor:pointer;padding:2px 4px;border-radius:6px;}
+.hbar:hover{background:var(--paper);}
+.hbar .hl{font-size:.8rem;color:var(--ink-soft);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.hbar .ht{height:14px;background:var(--rule-soft);border-radius:0 4px 4px 0;overflow:hidden;}
+.hbar .hf{height:100%;background:var(--blue);border-radius:0 4px 4px 0;transition:width .6s ease;}
+.hbar .hv{font-size:.8rem;font-weight:600;text-align:right;}
+
+/* office split */
+.split{display:flex;height:16px;border-radius:4px;overflow:hidden;gap:2px;margin:6px 0 10px;}
+.split div{height:100%;transition:width .6s ease;cursor:pointer;}
+.split-legend{display:flex;justify-content:space-between;font-size:.8rem;color:var(--ink-soft);margin-bottom:12px;}
+
+/* recent list */
+.recent{display:flex;flex-direction:column;}
+.recent-item{display:flex;gap:10px;padding:9px 6px;border-bottom:1px solid var(--rule-soft);cursor:pointer;border-radius:6px;align-items:flex-start;text-align:left;}
+.recent-item:last-child{border-bottom:none;}
+.recent-item:hover{background:var(--paper);}
+.recent-item .dot{width:8px;height:8px;border-radius:50%;margin-top:8px;flex-shrink:0;}
+.recent-item .rt{font-size:.84rem;font-weight:500;line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+.recent-item .rm{font-size:.72rem;color:var(--ink-faint);}
+
+/* tooltip */
+#tip{position:fixed;pointer-events:none;background:var(--ink);color:#fff;font-size:.78rem;padding:8px 11px;border-radius:8px;box-shadow:var(--shadow-lg);z-index:100;opacity:0;transition:opacity .1s;max-width:260px;line-height:1.45;}
+#tip.show{opacity:1;}
+#tip b{color:#f6d79a;}
+
+/* ---------- Hero search ---------- */
+.hero-search{background:linear-gradient(120deg,var(--ink) 0%,#1d4a66 60%,#215f6e 100%);border-radius:14px;padding:26px 28px;margin-bottom:22px;box-shadow:var(--shadow-md);position:relative;}
+.hero-search::before{content:"";position:absolute;inset:0;border-radius:14px;background:radial-gradient(circle at 90% -20%,rgba(184,132,44,.35),transparent 55%);pointer-events:none;}
+.hero-search h3{color:#fff;font-size:1.15rem;margin:0 0 2px;position:relative;}
+.hero-search p{color:#c7d4de;font-size:.86rem;margin:0 0 14px;position:relative;}
+.search-box{position:relative;max-width:680px;}
+.search-box input{width:100%;font-family:inherit;font-size:1rem;padding:13px 46px 13px 16px;border:none;border-radius:10px;background:#fff;color:var(--ink);box-shadow:0 6px 20px rgba(0,0,0,.25);}
+.search-box input:focus{outline:3px solid var(--gold);outline-offset:1px;}
+.search-box .search-icon{position:absolute;right:15px;top:50%;transform:translateY(-50%);color:var(--ink-faint);pointer-events:none;}
+.search-box .search-icon svg{width:20px;height:20px;}
+.search-suggest{position:absolute;left:0;right:0;top:calc(100% + 8px);background:#fff;border-radius:10px;box-shadow:var(--shadow-lg);overflow:hidden;z-index:20;display:none;}
+.search-suggest.active{display:block;}
+.sugg-item{display:flex;align-items:center;gap:10px;padding:11px 15px;cursor:pointer;border-bottom:1px solid var(--rule-soft);text-align:left;}
+.sugg-item:hover{background:var(--paper);}
+.sugg-item .sugg-text{flex:1;font-size:.88rem;}
+.sugg-item .sugg-date{font-size:.76rem;color:var(--ink-faint);flex-shrink:0;}
+.sugg-empty{padding:15px;text-align:center;color:var(--ink-soft);font-size:.85rem;}
+.year-chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px;position:relative;align-items:center;}
+.year-chip{background:rgba(255,255,255,.12);color:#e7edf1;border:1px solid rgba(255,255,255,.25);padding:5px 15px;border-radius:20px;font-size:.84rem;cursor:pointer;transition:all .15s;}
+.year-chip:hover{background:var(--gold);border-color:var(--gold);color:#fff;transform:translateY(-1px);}
+.browse-all-link{color:#f0d9b0;font-size:.85rem;text-decoration:underline;cursor:pointer;margin-left:6px;background:none;border:none;}
+
+/* ---------- Office tiles ---------- */
+.tiles{display:grid;grid-template-columns:1fr 1fr;gap:18px;}
+@media(max-width:720px){.tiles{grid-template-columns:1fr;}}
+.tile{position:relative;background:var(--paper-raised);border:1px solid var(--rule);border-radius:14px;padding:22px 24px;cursor:pointer;text-align:left;overflow:hidden;transition:transform .2s,box-shadow .2s;box-shadow:var(--shadow-sm);display:flex;align-items:center;gap:18px;}
+.tile:hover{transform:translateY(-3px);box-shadow:var(--shadow-md);}
+.tile:focus-visible{outline:3px solid var(--gold);outline-offset:2px;}
+.tile::before{content:"";position:absolute;top:0;left:0;right:0;height:5px;}
+.tile.state::before{background:linear-gradient(90deg,var(--state),var(--state-mark));}
+.tile.district::before{background:linear-gradient(90deg,var(--district),var(--district-mark));}
+.tile-icon{width:54px;height:54px;border-radius:14px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.tile.state .tile-icon{background:var(--state-soft);color:var(--state);}
+.tile.district .tile-icon{background:var(--district-soft);color:var(--district);}
+.tile-icon svg{width:26px;height:26px;}
+.tile h2{font-size:1.2rem;margin:0;}
+.tile .count-label{font-size:.82rem;color:var(--ink-soft);}
+.tile .count{font-family:'Noto Serif Devanagari',serif;font-size:2.3rem;font-weight:700;margin-left:auto;line-height:1;}
+.tile.state .count{color:var(--state);} .tile.district .count{color:var(--district);}
+
+/* ---------- List views ---------- */
+.list-view,.all-view{display:none;}
+.list-view.active,.all-view.active{display:block;}
+.hidden{display:none !important;}
+.back-btn{background:none;border:none;color:var(--ink-soft);cursor:pointer;font-size:.92rem;padding:0;margin-bottom:14px;display:inline-flex;align-items:center;gap:6px;}
+.back-btn:hover{color:var(--blue);}
+.back-btn svg{width:15px;height:15px;}
+.section-head{display:flex;align-items:center;gap:14px;margin-bottom:16px;}
+.section-head .icon-badge{width:42px;height:42px;border-radius:11px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.section-head .icon-badge svg{width:21px;height:21px;}
+.section-head.state .icon-badge{background:var(--state-soft);color:var(--state);}
+.section-head.district .icon-badge{background:var(--district-soft);color:var(--district);}
+.section-head.all .icon-badge{background:var(--gold-soft);color:var(--gold);}
+.section-head h2{margin:0;font-size:1.35rem;}
+.active-chip{display:inline-flex;align-items:center;gap:6px;background:var(--danger-soft);color:var(--danger);font-size:.8rem;padding:4px 12px;border-radius:20px;margin-bottom:12px;cursor:pointer;border:none;}
+
+.table-wrap{background:var(--paper-raised);border:1px solid var(--rule);border-radius:12px;overflow:hidden;box-shadow:var(--shadow-sm);}
+.table-scroll{overflow-x:auto;}
+table{width:100%;border-collapse:collapse;min-width:820px;}
+thead th{text-align:left;font-size:.8rem;font-weight:600;color:#fff;background:var(--ink);padding:13px 14px;white-space:nowrap;}
+thead th.center{text-align:center;}
+thead th.sortable{cursor:pointer;user-select:none;}
+thead th.sortable:hover{background:#1d3c55;}
+thead th .arrow{opacity:.6;font-size:.7rem;margin-left:4px;}
+tbody td{padding:13px 14px;border-bottom:1px solid var(--rule-soft);font-size:.9rem;vertical-align:top;text-align:left;}
+tbody td.sno{text-align:center;color:var(--ink-faint);font-weight:600;width:56px;}
+tbody tr{transition:background .12s;}
+tbody tr:hover{background:#faf8f3;}
+tbody tr[data-cat="राज्य"] td.sno{box-shadow:inset 3px 0 0 var(--state-mark);}
+tbody tr[data-cat="जिला"] td.sno{box-shadow:inset 3px 0 0 var(--district-mark);}
+.subject-cell{font-weight:600;min-width:220px;max-width:300px;line-height:1.45;}
+.subject-cell .lno{display:block;font-weight:400;font-size:.74rem;color:var(--ink-faint);margin-top:4px;}
+.new-badge{display:inline-block;font-size:.66rem;font-weight:700;background:var(--blue);color:#fff;padding:1px 7px;border-radius:10px;margin-left:6px;vertical-align:2px;letter-spacing:.3px;}
+.date-cell{white-space:nowrap;color:var(--ink-soft);min-width:120px;}
+.date-main{display:flex;align-items:center;gap:6px;}
+.date-main svg{width:14px;height:14px;color:var(--ink-faint);flex-shrink:0;}
+.date-note{font-size:.7rem;color:var(--ink-faint);margin-top:2px;white-space:normal;}
+.date-missing{display:inline-flex;align-items:center;gap:4px;font-size:.74rem;background:var(--danger-soft);color:var(--danger);padding:2px 9px;border-radius:12px;}
+.desc-cell{max-width:460px;color:var(--ink-soft);font-size:.86rem;}
+.desc-text{white-space:pre-line;}
+.desc-text.clamp{display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;}
+.more-btn{background:none;border:none;color:var(--blue);font-size:.78rem;cursor:pointer;padding:4px 0 0;font-weight:500;}
+.deadlines{margin-top:8px;padding:8px 10px;background:var(--gold-soft);border-radius:8px;font-size:.8rem;color:var(--ink);white-space:pre-line;}
+.deadlines b{display:block;color:var(--gold);font-size:.74rem;margin-bottom:2px;}
+.cat-badge{font-size:.74rem;padding:3px 10px;border-radius:20px;white-space:nowrap;font-weight:500;}
+.cat-badge.राज्य{background:var(--state-soft);color:var(--state);}
+.cat-badge.जिला{background:var(--district-soft);color:var(--district);}
+.rel{display:block;font-size:.72rem;color:var(--ink-faint);margin-top:6px;}
+.dl-btn{display:inline-flex;align-items:center;gap:6px;text-decoration:none;font-size:.84rem;padding:7px 14px;border-radius:8px;white-space:nowrap;border:1px solid;font-weight:500;transition:all .15s;}
+.dl-btn svg{width:14px;height:14px;}
+tr[data-cat="राज्य"] .dl-btn{color:var(--state);border-color:var(--state);}
+tr[data-cat="जिला"] .dl-btn{color:var(--district);border-color:var(--district);}
+tr[data-cat="राज्य"] .dl-btn:hover{background:var(--state);color:#fff;}
+tr[data-cat="जिला"] .dl-btn:hover{background:var(--district);color:#fff;}
+
+.empty-state,.error-state,.loading-state{text-align:center;padding:50px 20px;color:var(--ink-soft);}
+.error-state{color:var(--danger);}
+.loading-state .spinner{width:32px;height:32px;border:3px solid var(--rule);border-top-color:var(--gold);border-radius:50%;margin:0 auto 14px;animation:spin .8s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
+footer{max-width:1280px;margin:0 auto;padding:0 28px 40px;color:var(--ink-faint);font-size:.8rem;text-align:center;}
+@media(max-width:620px){main{padding:18px 16px 60px;} .masthead,.top-strip{padding-left:16px;padding-right:16px;} .filter-field select,.filter-field input{min-width:0;width:100%;} .filter-field{flex:1 1 140px;}}
+</style>
+</head>
+<body>
+
+<div class="top-strip">
+  <div class="top-strip-inner">
+    <span class="dept-label">
+      <img src="basic-education-logo.jpg" alt="Government of Uttar Pradesh" class="dept-logo">
+      Basic Education Department
+    </span>
+    <span class="nipun-badge">
+      <span class="nipun-text">Foundational Literacy &amp; Numeracy</span>
+      <img src="nipun-bharat-logo.png" alt="NIPUN Bharat" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+      <span class="nipun-fallback">NIPUN<br>BHARAT</span>
+    </span>
+  </div>
+</div>
+
+<header class="masthead">
+  <div class="masthead-inner">
+    <div class="brand">
+      <div class="brand-mark"><div class="inner">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" width="20" height="20"><path d="M4 21V9l8-6 8 6v12"/><path d="M9 21v-7h6v7"/></svg>
+      </div></div>
+      <div>
+        <h1>Letter Registry</h1>
+        <p>Education Department — Central Record of State &amp; District Correspondence</p>
+      </div>
+    </div>
+    <div class="meta">
+      <span id="lastUpdated">Loading data…</span>
+      <button class="icon-btn" id="refreshBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg> Refresh</button>
+    </div>
+  </div>
+</header>
+
+<main>
+  <div id="tilesView">
+
+    <!-- Global filters (apply to cards + charts) -->
+    <div class="filterbar fade-up">
+      <span class="fb-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 3H2l8 9.46V19l4 2v-8.54L22 3z"/></svg>Filters</span>
+      <div class="filter-field"><label for="gCat">Office</label>
+        <select id="gCat"><option value="">All</option><option value="राज्य">State</option><option value="जिला">District</option></select></div>
+      <div class="filter-field"><label for="gYear">Year</label><select id="gYear"><option value="">All</option></select></div>
+      <div class="filter-field" id="gRelWrap"><label for="gRel">Released By</label><select id="gRel"><option value="">All</option></select></div>
+      <button class="reset-btn" id="gReset">Clear</button>
+    </div>
+
+    <!-- KPI cards -->
+    <div class="kpis fade-up d1">
+      <div class="kpi total" data-go="all" tabindex="0" role="button">
+        <div class="k-top"><span class="k-label">Total Letters</span><span class="k-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg></span></div>
+        <div class="k-num" id="kTotal">—</div><div class="k-sub">Click to view all</div>
+      </div>
+      <div class="kpi state" data-go="राज्य" tabindex="0" role="button">
+        <div class="k-top"><span class="k-label">From State</span><span class="k-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 21V9l8-6 8 6v12"/></svg></span></div>
+        <div class="k-num" id="kState">—</div><div class="k-sub" id="kStatePct">&nbsp;</div>
+      </div>
+      <div class="kpi district" data-go="जिला" tabindex="0" role="button">
+        <div class="k-top"><span class="k-label">From District</span><span class="k-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 12-9 12s-9-5-9-12a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg></span></div>
+        <div class="k-num" id="kDistrict">—</div><div class="k-sub" id="kDistrictPct">&nbsp;</div>
+      </div>
+      <div class="kpi month" data-go="recent" tabindex="0" role="button">
+        <div class="k-top"><span class="k-label">Added in last 30 days</span><span class="k-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg></span></div>
+        <div class="k-num" id="kRecent">—</div><div class="k-sub">Newly uploaded to Drive</div>
+      </div>
+      <div class="kpi nodate" data-go="nodate" tabindex="0" role="button">
+        <div class="k-top"><span class="k-label">Date not found</span><span class="k-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg></span></div>
+        <div class="k-num" id="kNoDate">—</div><div class="k-sub">Fill in the Sheet</div>
+      </div>
+    </div>
+
+    <!-- Charts -->
+    <div class="charts fade-up d2">
+      <div class="card wide">
+        <h3>Letters by Month</h3>
+        <p class="card-sub">By date on the letter · last 12 months with letters · click a bar to open</p>
+        <div class="legend"><span><i style="background:var(--state-mark)"></i>State</span><span><i style="background:var(--district-mark)"></i>District</span></div>
+        <div class="colchart" id="monthChart"></div>
+        <div class="colchart-x" id="monthAxis"></div>
+      </div>
+      <div class="card">
+        <h3>Released By</h3>
+        <p class="card-sub">Issuing officer · click to filter</p>
+        <div class="split" id="officeSplit"></div>
+        <div class="split-legend" id="officeSplitLegend"></div>
+        <div class="hbars" id="relChart"></div>
+      </div>
+      <div class="card">
+        <h3>Recently Added</h3>
+        <p class="card-sub">Latest uploads to Drive</p>
+        <div class="recent" id="recentList"></div>
+      </div>
+    </div>
+
+    <div class="hero-search fade-up d3">
+      <h3>Search Any Letter</h3>
+      <p>Type a subject, letter number, year or keyword — searches State and District letters together</p>
+      <div class="search-box">
+        <input type="text" id="heroSearch" placeholder="e.g. निपुण, पुस्तक वितरण, 1184, 2026..." autocomplete="off">
+        <span class="search-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg></span>
+        <div class="search-suggest" id="searchSuggest"></div>
+      </div>
+      <div class="year-chips" id="yearChips"></div>
+    </div>
+
+    <div class="tiles fade-up d4">
+      <div class="tile state" tabindex="0" role="button" data-cat="राज्य">
+        <div class="tile-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 21V9l8-6 8 6v12"/><path d="M9 21v-7h6v7"/></svg></div>
+        <div><h2>Letters from State</h2><div class="count-label">View full list →</div></div>
+        <div class="count" id="stateCount">—</div>
+      </div>
+      <div class="tile district" tabindex="0" role="button" data-cat="जिला">
+        <div class="tile-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 10c0 7-9 12-9 12s-9-5-9-12a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg></div>
+        <div><h2>Letters from District</h2><div class="count-label">View full list →</div></div>
+        <div class="count" id="districtCount">—</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Letters table view (State / District / All share this) -->
+  <div id="allView" class="all-view">
+    <button class="back-btn" id="backBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg> Back to Dashboard</button>
+    <div class="section-head all" id="sectionHead">
+      <span class="icon-badge" id="sectionIcon"></span>
+      <div><h2 id="sectionTitle">All Letters</h2></div>
+    </div>
+    <button class="active-chip hidden" id="specialChip"></button>
+
+    <div class="filterbar">
+      <div class="filter-field"><label for="fCat">Office</label>
+        <select id="fCat"><option value="">All</option><option value="राज्य">State</option><option value="जिला">District</option></select></div>
+      <div class="filter-field"><label for="fYear">Year</label><select id="fYear"></select></div>
+      <div class="filter-field"><label for="fMonth">Month</label><select id="fMonth"></select></div>
+      <div class="filter-field" id="fRelWrap"><label for="fRel">Released By</label><select id="fRel"></select></div>
+      <div class="filter-field"><label for="fText">Search</label><input type="text" id="fText" placeholder="Subject, description, letter no…"></div>
+      <div class="filter-field"><label for="fSort">Sort by</label>
+        <select id="fSort">
+          <option value="dateDesc">Letter date: newest</option>
+          <option value="dateAsc">Letter date: oldest</option>
+          <option value="added">Recently added</option>
+          <option value="sno">S. No.</option>
+        </select></div>
+      <span class="result-count" id="resultCount"></span>
+      <button class="reset-btn" id="fReset">Clear</button>
+    </div>
+
+    <div class="table-wrap"><div class="table-scroll">
+      <table>
+        <thead><tr>
+          <th class="center">S. No.</th><th>Office</th><th>Subject</th>
+          <th class="sortable" id="dateTh">Issue Date <span class="arrow">▼</span></th>
+          <th>Brief Description</th><th>Letter</th>
+        </tr></thead>
+        <tbody id="tableBody"></tbody>
+      </table>
+      <div class="empty-state" id="emptyState" style="display:none;">No letters found matching this filter.</div>
+    </div></div>
+  </div>
+
+  <div class="loading-state" id="loadingState"><div class="spinner"></div>Loading the list of letters…</div>
+  <div class="error-state" id="errorState" style="display:none;"></div>
+</main>
+
+<div id="tip"></div>
+<footer>This dashboard updates automatically from letters added to Google Drive. In case of any discrepancy, please contact the concerned office for the original letter.</footer>
+
+<script>
+/* ============ CONFIG: your Google Sheet "Publish to web" CSV link ============ */
+const SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQRsgt5n1C0o_2tKuMkQ4hULDkn7oG8-qG5geoL3q1FYywimhJPy_aQMm77DtR7uheT6w70YYJZlzg-/pub?gid=0&single=true&output=csv";
+
+const MONTHS_HI = ["जनवरी","फरवरी","मार्च","अप्रैल","मई","जून","जुलाई","अगस्त","सितंबर","अक्टूबर","नवंबर","दिसंबर"];
+const MONTHS_SHORT = ["जन","फर","मार्च","अप्रैल","मई","जून","जुलाई","अग","सित","अक्टू","नव","दिस"];
+const MONTH_ALIASES = {"नवम्बर":"नवंबर","सितम्बर":"सितंबर","दिसम्बर":"दिसंबर","फ़रवरी":"फरवरी","अक्तूबर":"अक्टूबर"};
+const CATEGORY_LABEL = { "राज्य":"State", "जिला":"District" };
+const ICONS = {
+  state:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 21V9l8-6 8 6v12"/><path d="M9 21v-7h6v7"/></svg>',
+  district:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 10c0 7-9 12-9 12s-9-5-9-12a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>',
+  all:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 10h18M8 4v16"/></svg>',
+  calendar:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>',
+  download:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5 5 5-5M12 15V3"/></svg>'
+};
+const DAY = 86400000;
+
+let ALL_ROWS = [];
+let SPECIAL = null;            // "nodate" | "recent" | null
+let SORT = "dateDesc";
+const $ = (id) => document.getElementById(id);
+
+/* ---------------- Data loading & cleaning ---------------- */
+async function loadData(){
+  $("loadingState").style.display = "block";
+  $("errorState").style.display = "none";
+  $("tilesView").classList.add("hidden");
+  $("refreshBtn").classList.add("spinning");
+  try{
+    const res = await fetch(SHEET_CSV_URL + (SHEET_CSV_URL.includes("?") ? "&" : "?") + "t=" + Date.now());
+    if(!res.ok) throw new Error("HTTP " + res.status);
+    const parsed = Papa.parse(await res.text(), { header:true, skipEmptyLines:true });
+    ALL_ROWS = parsed.data.filter(r => r.Category && (r.Subject || r.FileName)).map(cleanRow);
+    $("tilesView").classList.remove("hidden");
+    fillGlobalFilters();
+    renderHome();
+    if($("allView").classList.contains("active")) applyFilters();
+  }catch(err){
+    $("errorState").style.display = "block";
+    $("errorState").innerHTML = "<strong>Could not load the list of letters.</strong><br><br>Please check: (1) the Google Sheet is published via \"Publish to web\", (2) your internet connection.<br><small>" + escapeHtml(err.message || String(err)) + "</small>";
+  }finally{
+    $("loadingState").style.display = "none";
+    $("refreshBtn").classList.remove("spinning");
+    $("lastUpdated").textContent = "Updated " + new Date().toLocaleString("en-IN", {dateStyle:"medium", timeStyle:"short"});
+  }
+}
+
+/** Normalises each row: real date object, month/year, upload time, released-by. */
+function cleanRow(r){
+  const row = Object.assign({}, r);
+  row.Subject = (r.Subject || "").trim() || (r.FileName || "").replace(/\.(pdf|jpe?g|png)$/i, "");
+  row.Month = MONTH_ALIASES[(r.Month||"").trim()] || (r.Month||"").trim();
+  row.Year = String(r.Year || "").replace(/\.0$/, "").trim();
+  row._date = parseIssueDate(r.IssueDate);
+  if(row._date){                                // keep Year/Month consistent with the date
+    row.Year = String(row._date.getFullYear());
+    row.Month = MONTHS_HI[row._date.getMonth()];
+  }
+  row._added = parseTimestamp(r.Timestamp);
+  row._rel = (r.ReleasedBy || "").trim();
+  row._search = [row.Subject, r.Description, r.LetterNo, r.FileName, row._rel].join(" ").toLowerCase();
+  return row;
+}
+
+/** IssueDate is DD/MM/YYYY text (v3 script). Also accepts YYYY-MM-DD. */
+function parseIssueDate(s){
+  s = String(s || "").trim();
+  if(!s) return null;
+  let m = s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
+  if(m) return validDate(+m[1], +m[2], +m[3]);
+  m = s.match(/^(\d{1,2})[\/.\-](\d{1,2})[\/.\-](\d{2,4})/);
+  if(m){ const y = m[3].length === 2 ? 2000 + +m[3] : +m[3]; return validDate(y, +m[2], +m[1]); }
+  return null;
+}
+/** Timestamp comes from Sheets in its locale; handles M/D/YYYY and D/M/YYYY. */
+function parseTimestamp(s){
+  s = String(s || "").trim();
+  if(!s) return null;
+  let m = s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
+  if(m) return validDate(+m[1], +m[2], +m[3]);
+  m = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);
+  if(!m) return null;
+  let a = +m[1], b = +m[2];
+  if(a > 12) return validDate(+m[3], b, a);       // clearly D/M
+  return validDate(+m[3], a, b) || validDate(+m[3], b, a); // Sheets US default: M/D
+}
+function validDate(y, mo, d){
+  if(mo < 1 || mo > 12 || d < 1 || d > 31 || y < 2000 || y > 2100) return null;
+  const dt = new Date(y, mo - 1, d);
+  return dt.getMonth() === mo - 1 ? dt : null;
+}
+const fmtDate = (d) => String(d.getDate()).padStart(2,"0") + "/" + String(d.getMonth()+1).padStart(2,"0") + "/" + d.getFullYear();
+
+/* ---------------- Home (KPIs + charts) ---------------- */
+function homeRows(){
+  const cat = $("gCat").value, year = $("gYear").value, rel = $("gRel").value;
+  return ALL_ROWS.filter(r => (!cat || r.Category === cat) && (!year || r.Year === year) && (!rel || r._rel === rel));
+}
+
+function fillGlobalFilters(){
+  const years = uniq(ALL_ROWS.map(r => r.Year)).sort((a,b) => b - a);
+  setOptions($("gYear"), years, "All");
+  const rels = uniq(ALL_ROWS.map(r => r._rel));
+  setOptions($("gRel"), rels.sort(), "All");
+  $("gRelWrap").classList.toggle("hidden", !rels.length);
+  $("yearChips").innerHTML = years.map(y => `<button class="year-chip" data-year="${y}">${y}</button>`).join("") +
+    `<button class="browse-all-link" id="browseAllLink">View all letters →</button>`;
+  document.querySelectorAll(".year-chip").forEach(c => c.addEventListener("click", () => openTable({ year: c.dataset.year })));
+  $("browseAllLink").addEventListener("click", () => openTable({}));
+}
+
+function renderHome(){
+  const rows = homeRows();
+  const st = rows.filter(r => r.Category === "राज्य").length;
+  const di = rows.filter(r => r.Category === "जिला").length;
+  const recent = rows.filter(r => r._added && Date.now() - r._added < 30 * DAY).length;
+  const nodate = rows.filter(r => !r._date).length;
+  countUp($("kTotal"), rows.length); countUp($("kState"), st); countUp($("kDistrict"), di);
+  countUp($("kRecent"), recent); countUp($("kNoDate"), nodate);
+  $("kStatePct").textContent = rows.length ? Math.round(st / rows.length * 100) + "% of total" : "";
+  $("kDistrictPct").textContent = rows.length ? Math.round(di / rows.length * 100) + "% of total" : "";
+  $("stateCount").textContent = ALL_ROWS.filter(r => r.Category === "राज्य").length;
+  $("districtCount").textContent = ALL_ROWS.filter(r => r.Category === "जिला").length;
+  renderMonthChart(rows); renderOfficeSplit(st, di); renderRelChart(rows); renderRecent(rows);
+}
+
+function renderMonthChart(rows){
+  const buckets = {};
+  rows.filter(r => r._date).forEach(r => {
+    const k = r._date.getFullYear() * 100 + r._date.getMonth();
+    (buckets[k] = buckets[k] || { s:0, d:0, y:r._date.getFullYear(), m:r._date.getMonth() })[r.Category === "राज्य" ? "s" : "d"]++;
+  });
+  const keys = Object.keys(buckets).map(Number).sort((a,b) => a - b).slice(-12);
+  const chart = $("monthChart"), axis = $("monthAxis");
+  if(!keys.length){ chart.innerHTML = '<div class="empty-state" style="width:100%;padding:30px">No dated letters for this filter</div>'; axis.innerHTML = ""; return; }
+  const max = Math.max(...keys.map(k => buckets[k].s + buckets[k].d));
+  chart.innerHTML = keys.map(k => {
+    const b = buckets[k], tot = b.s + b.d, h = 205;
+    const segs = (b.s ? `<div class="seg s" style="height:${b.s / max * h}px"></div>` : "") + (b.d ? `<div class="seg d" style="height:${b.d / max * h}px"></div>` : "");
+    return `<div class="col" data-y="${b.y}" data-m="${MONTHS_HI[b.m]}" data-tip="<b>${MONTHS_HI[b.m]} ${b.y}</b><br>State: ${b.s}<br>District: ${b.d}<br>Total: ${tot}"><span class="v">${tot}</span><div class="stack">${segs}</div></div>`;
+  }).join("");
+  axis.innerHTML = keys.map(k => `<span>${MONTHS_SHORT[buckets[k].m]}<br>${String(buckets[k].y).slice(2)}</span>`).join("");
+  chart.querySelectorAll(".col").forEach(c => {
+    bindTip(c);
+    c.addEventListener("click", () => openTable({ year: c.dataset.y, month: c.dataset.m, category: $("gCat").value, rel: $("gRel").value }));
+  });
+}
+
+function renderOfficeSplit(st, di){
+  const tot = st + di || 1;
+  $("officeSplit").innerHTML =
+    `<div style="width:${st/tot*100}%;background:var(--state-mark)" data-cat="राज्य" data-tip="<b>State</b>: ${st} letters (${Math.round(st/tot*100)}%)"></div>` +
+    `<div style="width:${di/tot*100}%;background:var(--district-mark)" data-cat="जिला" data-tip="<b>District</b>: ${di} letters (${Math.round(di/tot*100)}%)"></div>`;
+  $("officeSplitLegend").innerHTML = `<span><i style="display:inline-block;width:9px;height:9px;border-radius:2px;background:var(--state-mark);margin-right:5px"></i>State ${st}</span><span>District ${di}<i style="display:inline-block;width:9px;height:9px;border-radius:2px;background:var(--district-mark);margin-left:5px"></i></span>`;
+  $("officeSplit").querySelectorAll("div").forEach(d => { bindTip(d); d.addEventListener("click", () => openTable({ category: d.dataset.cat })); });
+}
+
+function renderRelChart(rows){
+  const counts = {};
+  rows.forEach(r => { const k = r._rel || "Not specified"; counts[k] = (counts[k] || 0) + 1; });
+  let items = Object.entries(counts).sort((a,b) => b[1] - a[1]);
+  if(items.length > 6){ const rest = items.slice(5).reduce((s, x) => s + x[1], 0); items = items.slice(0,5).concat([["Other", rest]]); }
+  const max = Math.max(1, ...items.map(x => x[1]));
+  $("relChart").innerHTML = items.length ? items.map(([k, v]) =>
+    `<div class="hbar" data-rel="${escapeAttr(k)}" data-tip="<b>${escapeHtml(k)}</b>: ${v} letters"><span class="hl">${escapeHtml(k)}</span><div class="ht"><div class="hf" style="width:${v/max*100}%"></div></div><span class="hv">${v}</span></div>`
+  ).join("") : '<div class="empty-state" style="padding:20px">No data</div>';
+  $("relChart").querySelectorAll(".hbar").forEach(b => {
+    bindTip(b);
+    const k = b.dataset.rel;
+    if(k !== "Other" && k !== "Not specified") b.addEventListener("click", () => openTable({ rel: k, category: $("gCat").value, year: $("gYear").value }));
+  });
+}
+
+function renderRecent(rows){
+  const list = rows.filter(r => r._added).sort((a,b) => b._added - a._added).slice(0, 5);
+  $("recentList").innerHTML = list.length ? list.map((r, i) =>
+    `<div class="recent-item" data-i="${i}"><span class="dot" style="background:${r.Category === "राज्य" ? "var(--state-mark)" : "var(--district-mark)"}"></span>
+      <div><div class="rt">${escapeHtml(r.Subject)}</div><div class="rm">${CATEGORY_LABEL[r.Category] || r.Category} · added ${fmtDate(r._added)}</div></div></div>`
+  ).join("") : '<div class="empty-state" style="padding:20px">No uploads yet</div>';
+  $("recentList").querySelectorAll(".recent-item").forEach(el => el.addEventListener("click", () => openTable({ text: list[+el.dataset.i].Subject })));
+}
+
+/* ---------------- Table view ---------------- */
+function openTable(p){
+  SPECIAL = p.special || null;
+  $("tilesView").classList.add("hidden");
+  $("allView").classList.add("active");
+  $("searchSuggest").classList.remove("active");
+  setOptions($("fYear"), uniq(ALL_ROWS.map(r => r.Year)).sort((a,b) => b - a), "All Years");
+  setOptions($("fMonth"), uniq(ALL_ROWS.map(r => r.Month)).sort((a,b) => MONTHS_HI.indexOf(a) - MONTHS_HI.indexOf(b)), "All Months");
+  const rels = uniq(ALL_ROWS.map(r => r._rel)).sort();
+  setOptions($("fRel"), rels, "All");
+  $("fRelWrap").classList.toggle("hidden", !rels.length);
+  $("fCat").value = p.category || ""; $("fYear").value = p.year || ""; $("fMonth").value = p.month || "";
+  $("fRel").value = p.rel || ""; $("fText").value = p.text || "";
+  SORT = SPECIAL === "recent" ? "added" : "dateDesc"; $("fSort").value = SORT;
+  applyFilters();
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+function applyFilters(){
+  const cat = $("fCat").value, year = $("fYear").value, month = $("fMonth").value, rel = $("fRel").value;
+  const q = $("fText").value.trim().toLowerCase();
+  let rows = ALL_ROWS.filter(r =>
+    (!cat || r.Category === cat) && (!year || r.Year === year) && (!month || r.Month === month) &&
+    (!rel || r._rel === rel) && (!q || r._search.includes(q)));
+  if(SPECIAL === "nodate") rows = rows.filter(r => !r._date);
+  if(SPECIAL === "recent") rows = rows.filter(r => r._added && Date.now() - r._added < 30 * DAY);
+
+  const t = (d) => d ? d.getTime() : null;
+  rows.sort((a, b) => {
+    if(SORT === "sno") return (a.Category || "").localeCompare(b.Category || "") || Number(a.SNo || 0) - Number(b.SNo || 0);
+    if(SORT === "added") return (t(b._added) || 0) - (t(a._added) || 0);
+    const da = t(a._date), db = t(b._date);
+    if(da === null && db === null) return (t(b._added) || 0) - (t(a._added) || 0);
+    if(da === null) return 1; if(db === null) return -1;      // undated letters go last
+    return SORT === "dateAsc" ? da - db : db - da;
+  });
+
+  // Header
+  const isState = cat === "राज्य", isDistrict = cat === "जिला";
+  $("sectionHead").className = "section-head " + (isState ? "state" : isDistrict ? "district" : "all");
+  $("sectionIcon").innerHTML = isState ? ICONS.state : isDistrict ? ICONS.district : ICONS.all;
+  $("sectionTitle").textContent = isState ? "Letters from State" : isDistrict ? "Letters from District" : "All Letters";
+  const chip = $("specialChip");
+  chip.classList.toggle("hidden", !SPECIAL);
+  chip.textContent = SPECIAL === "nodate" ? "Showing only letters where the date was not found  ✕" : SPECIAL === "recent" ? "Showing letters added in the last 30 days  ✕" : "";
+  $("dateTh").querySelector(".arrow").textContent = SORT === "dateAsc" ? "▲" : "▼";
+
+  renderTable(rows);
+  $("resultCount").textContent = rows.length + (rows.length === 1 ? " letter" : " letters");
+}
+
+function renderTable(rows){
+  const body = $("tableBody");
+  $("emptyState").style.display = rows.length ? "none" : "block";
+  body.innerHTML = rows.map((r, i) => {
+    const isNew = r._added && Date.now() - r._added < 7 * DAY;
+    let dateHtml;
+    if(r._date){
+      dateHtml = `<div class="date-main">${ICONS.calendar}${fmtDate(r._date)}</div>`;
+    }else if(r.Month && r.Year){
+      dateHtml = `<div class="date-main">${ICONS.calendar}${escapeHtml(r.Month)} ${escapeHtml(r.Year)}</div><div class="date-note">Exact date not found</div>`;
+    }else{
+      dateHtml = `<span class="date-missing">Not on letter</span>` + (r._added ? `<div class="date-note">Uploaded ${fmtDate(r._added)}</div>` : "");
+    }
+    const desc = r.Description || "—";
+    const long = desc.length > 180 || (r.Deadlines || "").trim();
+    return `<tr data-cat="${escapeAttr(r.Category)}">
+      <td class="sno">${escapeHtml(String(r.SNo || i + 1).replace(/\.0$/, ""))}</td>
+      <td><span class="cat-badge ${escapeAttr(r.Category)}">${CATEGORY_LABEL[r.Category] || escapeHtml(r.Category)}</span>${r._rel ? `<span class="rel">${escapeHtml(r._rel)}</span>` : ""}</td>
+      <td class="subject-cell">${escapeHtml(r.Subject)}${isNew ? '<span class="new-badge">NEW</span>' : ""}${r.LetterNo ? `<span class="lno">पत्रांक: ${escapeHtml(r.LetterNo)}</span>` : ""}</td>
+      <td class="date-cell">${dateHtml}</td>
+      <td class="desc-cell"><div class="desc-text${long ? " clamp" : ""}">${escapeHtml(desc)}</div>
+        ${(r.Deadlines || "").trim() ? `<div class="deadlines hidden"><b>समय-सीमा / Deadlines</b>${escapeHtml(r.Deadlines)}</div>` : ""}
+        ${long ? '<button class="more-btn">Read more ▾</button>' : ""}</td>
+      <td>${r.FileLink ? `<a class="dl-btn" href="${escapeAttr(r.FileLink)}" target="_blank" rel="noopener">${ICONS.download} View</a>` : "—"}</td>
+    </tr>`;
+  }).join("");
+  body.querySelectorAll(".more-btn").forEach(btn => btn.addEventListener("click", () => {
+    const cell = btn.closest(".desc-cell");
+    const open = cell.querySelector(".desc-text").classList.toggle("clamp");
+    const dl = cell.querySelector(".deadlines"); if(dl) dl.classList.toggle("hidden", open);
+    btn.textContent = open ? "Read more ▾" : "Show less ▴";
+  }));
+}
+
+/* ---------------- Hero search ---------------- */
+let searchDebounce;
+$("heroSearch").addEventListener("input", (e) => {
+  clearTimeout(searchDebounce);
+  const q = e.target.value.trim().toLowerCase();
+  if(!q){ $("searchSuggest").classList.remove("active"); return; }
+  searchDebounce = setTimeout(() => renderSuggestions(q), 120);
+});
+$("heroSearch").addEventListener("keydown", (e) => { if(e.key === "Enter" && e.target.value.trim()) openTable({ text: e.target.value.trim() }); });
+document.addEventListener("click", (e) => { if(!e.target.closest(".search-box")) $("searchSuggest").classList.remove("active"); });
+
+function renderSuggestions(q){
+  const matches = ALL_ROWS.filter(r => r._search.includes(q) || r.Year === q).slice(0, 6);
+  const box = $("searchSuggest");
+  box.innerHTML = matches.length ? matches.map((r, i) => `
+    <div class="sugg-item" data-i="${i}">
+      <span class="cat-badge ${escapeAttr(r.Category)}">${CATEGORY_LABEL[r.Category] || r.Category}</span>
+      <span class="sugg-text">${escapeHtml(r.Subject)}</span>
+      <span class="sugg-date">${r._date ? fmtDate(r._date) : ""}</span>
+    </div>`).join("") : '<div class="sugg-empty">No matching letters — press Enter to search the full list</div>';
+  box.querySelectorAll(".sugg-item").forEach(el => el.addEventListener("click", () => openTable({ text: matches[+el.dataset.i].Subject })));
+  box.classList.add("active");
+}
+
+/* ---------------- Helpers ---------------- */
+function uniq(a){ return [...new Set(a.filter(Boolean))]; }
+function setOptions(sel, values, allLabel){
+  const cur = sel.value;
+  sel.innerHTML = `<option value="">${allLabel}</option>` + values.map(v => `<option value="${escapeAttr(v)}">${escapeHtml(v)}</option>`).join("");
+  if(values.includes(cur)) sel.value = cur;
+}
+function escapeHtml(str){ return String(str ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
+function escapeAttr(str){ return escapeHtml(str); }
+function countUp(el, to){
+  const from = Number(el.dataset.v || 0); el.dataset.v = to;
+  const t0 = performance.now(), dur = 500;
+  (function step(now){
+    const p = Math.min(1, (now - t0) / dur);
+    el.textContent = Math.round(from + (to - from) * (1 - Math.pow(1 - p, 3)));
+    if(p < 1) requestAnimationFrame(step);
+  })(t0);
+}
+const tip = $("tip");
+function bindTip(el){
+  el.addEventListener("mousemove", (e) => {
+    tip.innerHTML = el.dataset.tip; tip.classList.add("show");
+    const x = Math.min(e.clientX + 14, window.innerWidth - tip.offsetWidth - 10);
+    tip.style.left = x + "px"; tip.style.top = (e.clientY + 14) + "px";
+  });
+  el.addEventListener("mouseleave", () => tip.classList.remove("show"));
+}
+
+/* ---------------- Events ---------------- */
+["gCat","gYear","gRel"].forEach(id => $(id).addEventListener("change", renderHome));
+$("gReset").addEventListener("click", () => { $("gCat").value = ""; $("gYear").value = ""; $("gRel").value = ""; renderHome(); });
+
+document.querySelectorAll(".kpi").forEach(k => {
+  const go = () => {
+    const g = k.dataset.go, base = { year: $("gYear").value, rel: $("gRel").value, category: $("gCat").value };
+    if(g === "राज्य" || g === "जिला") base.category = g;
+    if(g === "nodate" || g === "recent") base.special = g;
+    openTable(base);
+  };
+  k.addEventListener("click", go);
+  k.addEventListener("keypress", (e) => { if(e.key === "Enter") go(); });
+});
+document.querySelectorAll(".tile").forEach(tile => {
+  const go = () => openTable({ category: tile.dataset.cat });
+  tile.addEventListener("click", go);
+  tile.addEventListener("keypress", (e) => { if(e.key === "Enter") go(); });
+});
+
+["fCat","fYear","fMonth","fRel"].forEach(id => $(id).addEventListener("change", applyFilters));
+$("fText").addEventListener("input", applyFilters);
+$("fSort").addEventListener("change", () => { SORT = $("fSort").value; applyFilters(); });
+$("dateTh").addEventListener("click", () => { SORT = SORT === "dateDesc" ? "dateAsc" : "dateDesc"; $("fSort").value = SORT; applyFilters(); });
+$("specialChip").addEventListener("click", () => { SPECIAL = null; applyFilters(); });
+$("fReset").addEventListener("click", () => {
+  ["fCat","fYear","fMonth","fRel","fText"].forEach(id => $(id).value = "");
+  SPECIAL = null; SORT = "dateDesc"; $("fSort").value = SORT; applyFilters();
+});
+$("backBtn").addEventListener("click", () => {
+  $("allView").classList.remove("active"); $("tilesView").classList.remove("hidden");
+  $("heroSearch").value = ""; SPECIAL = null; renderHome();
+});
+$("refreshBtn").addEventListener("click", loadData);
+
+loadData();
+</script>
+</body>
+</html>
