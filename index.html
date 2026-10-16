@@ -1,0 +1,784 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Letter Registry — Education Department</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+Devanagari:wght@600;700&family=Noto+Sans+Devanagari:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+<style>
+:root{
+  --ink:#10263a; --ink-2:#3a5266; --ink-3:#7a8d9e;
+  --bg:#eef2f6; --card:#ffffff; --line:#e1e7ee; --line-2:#f0f3f7;
+  --navy:#10263a; --navy-2:#1b3d5a;
+  --state:#c2562a; --state-dark:#8a3d1f; --state-soft:#fbe9df;
+  --district:#1f8a6b; --district-dark:#17604b; --district-soft:#dcf1e8;
+  --bsa:#2563c9; --beo:#cc4a8f; --hm:#9a7a0c;
+  --accent:#2563c9; --accent-soft:#e4edfb;
+  --gold:#d79a2b; --gold-soft:#fbf0d9;
+  --danger:#c03b3b; --danger-soft:#fde8e6;
+  --h0:#edf2f7; --h1:#d3e3f7; --h2:#a7c7ef; --h3:#6d9fe0; --h4:#3a77cc; --h5:#1d4f9a;
+  --r:14px;
+  --sh-1:0 1px 2px rgba(16,38,58,.05), 0 4px 14px rgba(16,38,58,.06);
+  --sh-2:0 10px 30px rgba(16,38,58,.14);
+}
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+body{background:var(--bg);color:var(--ink);font-family:'Noto Sans Devanagari','Noto Sans',system-ui,sans-serif;line-height:1.55;-webkit-font-smoothing:antialiased;}
+h1,h2,h3{font-family:'Noto Serif Devanagari','Noto Sans Devanagari',serif;margin:0;}
+button,input,select{font-family:inherit;}
+svg{display:block;}
+.hidden{display:none !important;}
+@keyframes rise{from{opacity:0;transform:translateY(12px);}to{opacity:1;transform:none;}}
+@keyframes spin{to{transform:rotate(360deg);}}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.45}}
+.rise{animation:rise .5s cubic-bezier(.2,.7,.2,1) both;}
+
+/* ================= HEADER ================= */
+.hero{background:radial-gradient(1200px 400px at 85% -40%, rgba(215,154,43,.35), transparent 60%),
+  radial-gradient(900px 400px at -10% 120%, rgba(31,138,107,.35), transparent 60%),
+  linear-gradient(120deg,var(--navy) 0%, var(--navy-2) 55%, #1d4f6a 100%);
+  color:#fff;padding:0 0 74px;position:relative;overflow:hidden;}
+.hero::after{content:"";position:absolute;inset:0;background-image:radial-gradient(rgba(255,255,255,.07) 1px, transparent 1px);background-size:18px 18px;pointer-events:none;}
+.wrap{max-width:1320px;margin:0 auto;padding:0 28px;position:relative;z-index:1;}
+.topbar{display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid rgba(255,255,255,.12);gap:12px;flex-wrap:wrap;}
+.dept{display:flex;align-items:center;gap:10px;font-size:.76rem;letter-spacing:.7px;text-transform:uppercase;color:#d6e2ec;font-weight:500;}
+.dept img{height:30px;width:30px;border-radius:50%;background:#fff;padding:2px;object-fit:contain;}
+.nipun{display:flex;align-items:center;gap:8px;font-size:.74rem;color:#d6e2ec;}
+.nipun img{height:40px;border-radius:6px;}
+.nipun .fb{display:none;width:36px;height:36px;border-radius:50%;background:var(--gold);color:var(--navy);font-size:.5rem;font-weight:700;align-items:center;justify-content:center;text-align:center;line-height:1.1;}
+.titlebar{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap;padding:26px 0 0;}
+.titlebar h1{font-size:2rem;line-height:1.15;letter-spacing:.2px;}
+.titlebar p{margin:4px 0 0;color:#c4d4e1;font-size:.92rem;}
+.live{display:flex;align-items:center;gap:10px;font-size:.8rem;color:#c4d4e1;}
+.live .dot{width:8px;height:8px;border-radius:50%;background:#3ad08f;box-shadow:0 0 0 4px rgba(58,208,143,.2);animation:pulse 2s infinite;}
+.btn-ghost{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.25);color:#fff;padding:7px 14px;border-radius:20px;cursor:pointer;font-size:.82rem;display:inline-flex;align-items:center;gap:6px;transition:background .15s;}
+.btn-ghost:hover{background:rgba(255,255,255,.2);}
+.btn-ghost svg{width:14px;height:14px;}
+.btn-ghost.spinning svg{animation:spin .8s linear infinite;}
+
+/* ================= STICKY SEARCH TOOLBAR ================= */
+.toolbar-shell{position:sticky;top:0;z-index:50;margin-top:-50px;padding:0 0 4px;}
+.toolbar{background:var(--card);border-radius:16px;box-shadow:var(--sh-2);padding:12px;display:flex;gap:10px;align-items:center;flex-wrap:wrap;border:1px solid var(--line);}
+.search{flex:1 1 360px;position:relative;}
+.search svg{position:absolute;left:14px;top:50%;transform:translateY(-50%);width:20px;height:20px;color:var(--ink-3);}
+.search input{width:100%;font-size:1rem;padding:12px 40px 12px 44px;border:1.5px solid var(--line);border-radius:11px;background:#f7f9fb;color:var(--ink);transition:border .15s, background .15s;}
+.search input:focus{outline:none;border-color:var(--accent);background:#fff;box-shadow:0 0 0 4px var(--accent-soft);}
+.search .clear-q{position:absolute;right:10px;top:50%;transform:translateY(-50%);border:none;background:var(--line);width:24px;height:24px;border-radius:50%;cursor:pointer;color:var(--ink-2);font-size:.9rem;line-height:1;display:none;}
+.search.has-q .clear-q{display:block;}
+.seg{display:inline-flex;background:#f1f4f8;border-radius:11px;padding:4px;gap:2px;}
+.seg button{border:none;background:none;padding:8px 14px;border-radius:8px;cursor:pointer;font-size:.86rem;color:var(--ink-2);font-weight:500;display:flex;align-items:center;gap:6px;white-space:nowrap;}
+.seg button .sw{width:9px;height:9px;border-radius:3px;}
+.seg button.on{background:#fff;color:var(--ink);box-shadow:0 1px 3px rgba(16,38,58,.15);}
+.tsel{font-size:.88rem;padding:10px 12px;border:1.5px solid var(--line);border-radius:11px;background:#f7f9fb;color:var(--ink);cursor:pointer;}
+.tsel:focus{outline:none;border-color:var(--accent);}
+.jump{border:none;background:var(--accent);color:#fff;padding:11px 16px;border-radius:11px;cursor:pointer;font-size:.88rem;font-weight:600;white-space:nowrap;display:flex;align-items:center;gap:8px;transition:transform .12s;}
+.jump:hover{transform:translateY(-1px);}
+.jump b{background:rgba(255,255,255,.22);padding:1px 8px;border-radius:10px;}
+.chips-row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;flex-basis:100%;padding:2px 2px 0;}
+.chips-row:empty{display:none;}
+.fchip{display:inline-flex;align-items:center;gap:6px;background:var(--accent-soft);color:var(--accent);border:none;border-radius:20px;padding:4px 6px 4px 12px;font-size:.8rem;font-weight:500;cursor:pointer;}
+.fchip span{background:rgba(37,99,201,.15);border-radius:50%;width:18px;height:18px;display:inline-flex;align-items:center;justify-content:center;font-size:.75rem;}
+.fchip.clear-all{background:none;color:var(--danger);padding:4px 10px;text-decoration:underline;}
+
+main{padding-top:14px;padding-bottom:60px;}
+
+/* ================= KPI ================= */
+.kpis{display:grid;grid-template-columns:repeat(5,1fr);gap:14px;margin:14px 0 18px;}
+.kpi{background:var(--card);border-radius:var(--r);padding:16px 16px 12px;box-shadow:var(--sh-1);border:1px solid var(--line);cursor:pointer;position:relative;overflow:hidden;transition:transform .18s, box-shadow .18s;text-align:left;}
+.kpi:hover{transform:translateY(-3px);box-shadow:var(--sh-2);}
+.kpi.sel{outline:2.5px solid var(--kc);outline-offset:-2px;}
+.kpi .kh{display:flex;justify-content:space-between;align-items:center;}
+.kpi .kl{font-size:.8rem;color:var(--ink-2);font-weight:600;}
+.kpi .ki{width:34px;height:34px;border-radius:10px;display:flex;align-items:center;justify-content:center;background:var(--ks);color:var(--kc);}
+.kpi .ki svg{width:18px;height:18px;}
+.kpi .kn{font-family:'Noto Serif Devanagari',serif;font-size:2.1rem;font-weight:700;line-height:1.1;margin-top:6px;}
+.kpi .kf{display:flex;justify-content:space-between;align-items:flex-end;gap:8px;margin-top:4px;}
+.kpi .ks{font-size:.74rem;color:var(--ink-3);}
+.kpi .bar{height:5px;border-radius:3px;background:var(--line-2);margin-top:8px;overflow:hidden;}
+.kpi .bar i{display:block;height:100%;background:var(--kc);border-radius:3px;transition:width .7s ease;}
+.k-total{--kc:var(--navy-2);--ks:#e3ebf3;}
+.k-state{--kc:var(--state);--ks:var(--state-soft);}
+.k-district{--kc:var(--district);--ks:var(--district-soft);}
+.k-recent{--kc:var(--accent);--ks:var(--accent-soft);}
+.k-nodate{--kc:var(--danger);--ks:var(--danger-soft);}
+
+/* ================= CARDS / GRID ================= */
+.grid{display:grid;gap:14px;margin-bottom:14px;}
+.g-a{grid-template-columns:1.75fr 1fr;}
+.g-b{grid-template-columns:1.15fr 1fr 1fr;}
+.card{background:var(--card);border-radius:var(--r);border:1px solid var(--line);box-shadow:var(--sh-1);padding:18px 18px 16px;min-width:0;}
+.card-h{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:12px;}
+.card-h h3{font-size:1.02rem;}
+.card-h p{margin:2px 0 0;font-size:.76rem;color:var(--ink-3);}
+.badge-i{font-size:.7rem;color:var(--ink-3);background:var(--line-2);padding:3px 9px;border-radius:12px;white-space:nowrap;}
+
+/* heatmap */
+.heat{display:grid;gap:5px;}
+.heat .hr{display:grid;grid-template-columns:52px repeat(12,1fr) 44px;gap:5px;align-items:center;}
+.heat .hy{font-size:.82rem;font-weight:700;color:var(--ink-2);}
+.heat .hm{font-size:.7rem;color:var(--ink-3);text-align:center;}
+.heat .ht{font-size:.78rem;font-weight:700;text-align:right;color:var(--ink-2);}
+.heat .c{aspect-ratio:1.35;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:.8rem;font-weight:700;cursor:pointer;transition:transform .12s, box-shadow .12s;border:2px solid transparent;}
+.heat .c.z{cursor:default;}
+.heat .c:not(.z):hover{transform:scale(1.08);box-shadow:0 4px 12px rgba(16,38,58,.2);}
+.heat .c.sel{border-color:var(--ink);}
+.heat-legend{display:flex;align-items:center;gap:4px;font-size:.7rem;color:var(--ink-3);margin-top:12px;justify-content:flex-end;}
+.heat-legend i{width:16px;height:12px;border-radius:3px;display:inline-block;}
+
+/* donut */
+.donut-wrap{display:flex;align-items:center;gap:18px;flex-wrap:wrap;justify-content:center;}
+.donut svg path{cursor:pointer;transition:opacity .15s, transform .15s;transform-origin:110px 110px;}
+.donut svg path:hover{transform:scale(1.03);}
+.donut svg path.dim{opacity:.25;}
+.dleg{display:flex;flex-direction:column;gap:10px;min-width:150px;}
+.dleg button{display:flex;align-items:center;gap:10px;border:1px solid var(--line);background:#fff;padding:9px 12px;border-radius:10px;cursor:pointer;text-align:left;transition:border .15s;}
+.dleg button:hover{border-color:var(--ink-3);}
+.dleg button.on{border-color:var(--ink);box-shadow:0 0 0 1px var(--ink);}
+.dleg .sw{width:12px;height:12px;border-radius:4px;flex-shrink:0;}
+.dleg .t{font-size:.84rem;color:var(--ink-2);}
+.dleg .n{font-weight:700;font-size:1rem;margin-left:auto;}
+.dleg .p{font-size:.72rem;color:var(--ink-3);}
+
+/* venn */
+.venn svg{width:100%;height:auto;max-height:320px;}
+.venn circle.set{cursor:pointer;transition:fill-opacity .15s;}
+.venn circle.set:hover{fill-opacity:.3;}
+.venn .reg{cursor:pointer;}
+.venn .reg circle{fill:#fff;stroke:var(--line);transition:all .15s;}
+.venn .reg:hover circle{stroke:var(--ink);stroke-width:2;}
+.venn .reg.sel circle{fill:var(--ink);stroke:var(--ink);}
+.venn .reg.sel text{fill:#fff;}
+.venn .reg.zero{opacity:.45;}
+.venn-note{font-size:.74rem;color:var(--ink-3);margin-top:6px;display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;}
+.venn-note button{background:none;border:none;color:var(--accent);cursor:pointer;font-size:.74rem;padding:0;text-decoration:underline;}
+
+/* hbars */
+.hbars{display:flex;flex-direction:column;gap:6px;}
+.hb{display:grid;grid-template-columns:118px 1fr 34px;gap:10px;align-items:center;padding:5px 6px;border-radius:8px;cursor:pointer;border:1.5px solid transparent;transition:background .12s;}
+.hb:hover{background:#f5f8fb;}
+.hb.on{border-color:var(--ink);background:#f5f8fb;}
+.hb .l{font-size:.82rem;color:var(--ink-2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:flex;align-items:center;gap:6px;}
+.hb .tr{height:16px;background:var(--line-2);border-radius:0 5px 5px 0;overflow:hidden;}
+.hb .f{height:100%;border-radius:0 5px 5px 0;transition:width .7s cubic-bezier(.2,.7,.2,1);}
+.hb .v{font-size:.84rem;font-weight:700;text-align:right;}
+.hb.dis{opacity:.4;cursor:default;}
+
+/* ================= RESULTS ================= */
+.results{margin-top:22px;scroll-margin-top:120px;}
+.res-h{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:14px;}
+.res-h h2{font-size:1.4rem;display:flex;align-items:center;gap:10px;}
+.res-h h2 .cnt{font-family:'Noto Sans Devanagari',sans-serif;font-size:.85rem;background:var(--navy);color:#fff;padding:2px 11px;border-radius:12px;font-weight:600;}
+.res-tools{display:flex;gap:8px;align-items:center;flex-wrap:wrap;}
+.list{display:grid;grid-template-columns:repeat(auto-fill,minmax(360px,1fr));gap:14px;}
+.lc{background:var(--card);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--sh-1);padding:16px 18px 14px 20px;position:relative;overflow:hidden;display:flex;flex-direction:column;gap:8px;transition:box-shadow .18s, transform .18s;animation:rise .35s ease both;}
+.lc:hover{box-shadow:var(--sh-2);transform:translateY(-2px);}
+.lc::before{content:"";position:absolute;left:0;top:0;bottom:0;width:5px;background:var(--lc);}
+.lc[data-cat="राज्य"]{--lc:var(--state);--lcs:var(--state-soft);--lcd:var(--state-dark);}
+.lc[data-cat="जिला"]{--lc:var(--district);--lcs:var(--district-soft);--lcd:var(--district-dark);}
+.lc-top{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+.ob{font-size:.72rem;font-weight:600;padding:3px 10px;border-radius:20px;background:var(--lcs);color:var(--lcd);}
+.rb{font-size:.72rem;color:var(--ink-2);background:var(--line-2);padding:3px 9px;border-radius:20px;}
+.nw{font-size:.66rem;font-weight:700;background:var(--accent);color:#fff;padding:2px 8px;border-radius:10px;letter-spacing:.4px;}
+.dt{margin-left:auto;font-size:.8rem;color:var(--ink-2);display:flex;align-items:center;gap:5px;white-space:nowrap;}
+.dt svg{width:14px;height:14px;color:var(--ink-3);}
+.dt.miss{color:var(--danger);background:var(--danger-soft);padding:2px 9px;border-radius:12px;font-size:.74rem;}
+.lc h4{margin:0;font-size:1rem;line-height:1.45;font-weight:600;color:var(--ink);}
+.lc .lno{font-size:.74rem;color:var(--ink-3);}
+.lc .desc{font-size:.86rem;color:var(--ink-2);white-space:pre-line;}
+.lc .desc.clamp{display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;}
+.lc .dl{background:var(--gold-soft);border-radius:9px;padding:8px 11px;font-size:.8rem;white-space:pre-line;}
+.lc .dl b{display:block;color:#9a6a12;font-size:.72rem;}
+.tags{display:flex;gap:6px;flex-wrap:wrap;}
+.tag{font-size:.7rem;padding:2px 9px;border-radius:12px;background:#f1f4f8;color:var(--ink-2);border:none;cursor:pointer;}
+.tag:hover{background:var(--accent-soft);color:var(--accent);}
+.role{font-size:.7rem;padding:2px 8px;border-radius:12px;font-weight:600;color:#fff;}
+.lc-foot{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-top:auto;padding-top:6px;border-top:1px dashed var(--line);}
+.more{background:none;border:none;color:var(--accent);cursor:pointer;font-size:.8rem;font-weight:600;padding:0;}
+.view{display:inline-flex;align-items:center;gap:6px;text-decoration:none;font-size:.82rem;font-weight:600;padding:7px 14px;border-radius:9px;background:var(--lc);color:#fff;transition:filter .15s;}
+.view:hover{filter:brightness(1.1);}
+.view svg{width:14px;height:14px;}
+mark{background:#ffe58a;color:inherit;border-radius:3px;padding:0 1px;}
+.show-more{display:block;margin:18px auto 0;border:1.5px solid var(--line);background:#fff;color:var(--ink);padding:11px 26px;border-radius:12px;cursor:pointer;font-weight:600;font-size:.9rem;}
+.show-more:hover{border-color:var(--accent);color:var(--accent);}
+
+/* table view */
+.tbl-wrap{background:var(--card);border:1px solid var(--line);border-radius:var(--r);overflow:hidden;box-shadow:var(--sh-1);}
+.tbl-scroll{overflow-x:auto;}
+table{width:100%;border-collapse:collapse;min-width:860px;}
+th{text-align:left;font-size:.78rem;color:#fff;background:var(--navy);padding:12px 14px;white-space:nowrap;font-weight:600;}
+td{text-align:left;padding:12px 14px;border-bottom:1px solid var(--line-2);font-size:.88rem;vertical-align:top;}
+tr:hover td{background:#f8fafc;}
+td.s{font-weight:600;max-width:320px;}
+td.d{color:var(--ink-2);font-size:.84rem;max-width:420px;white-space:pre-line;}
+td .view{background:none;color:var(--lc);border:1px solid var(--lc);}
+tr[data-cat="राज्य"]{--lc:var(--state);--lcs:var(--state-soft);--lcd:var(--state-dark);}
+tr[data-cat="जिला"]{--lc:var(--district);--lcs:var(--district-soft);--lcd:var(--district-dark);}
+
+.empty{text-align:center;padding:50px 20px;color:var(--ink-2);background:var(--card);border-radius:var(--r);border:1px dashed var(--line);}
+.empty b{display:block;font-size:1.05rem;color:var(--ink);margin-bottom:4px;}
+.state-msg{text-align:center;padding:70px 20px;color:var(--ink-2);}
+.state-msg .sp{width:34px;height:34px;border:3px solid var(--line);border-top-color:var(--accent);border-radius:50%;margin:0 auto 14px;animation:spin .8s linear infinite;}
+.state-msg.err{color:var(--danger);}
+
+#tip{position:fixed;pointer-events:none;background:var(--navy);color:#fff;font-size:.78rem;padding:8px 11px;border-radius:9px;box-shadow:var(--sh-2);z-index:200;opacity:0;transition:opacity .1s;max-width:260px;line-height:1.45;}
+#tip.show{opacity:1;}
+#tip b{color:#f6d79a;}
+footer{text-align:center;color:var(--ink-3);font-size:.78rem;padding:0 20px 40px;}
+
+@media(max-width:1100px){.kpis{grid-template-columns:repeat(3,1fr);} .g-a,.g-b{grid-template-columns:1fr 1fr;} .g-a .heat-card{grid-column:1/-1;} .g-b .venn-card{grid-column:1/-1;}}
+@media(max-width:700px){
+  .wrap{padding:0 16px;} .titlebar h1{font-size:1.5rem;}
+  .kpis{grid-template-columns:repeat(2,1fr);} .g-a,.g-b{grid-template-columns:1fr;}
+  .list{grid-template-columns:1fr;} .seg{width:100%;} .seg button{flex:1;justify-content:center;padding:8px 6px;}
+  .tsel,.jump{flex:1;} .heat .hr{grid-template-columns:38px repeat(12,1fr) 30px;gap:3px;} .heat .c{font-size:.66rem;border-radius:5px;}
+  .heat .hm{font-size:.58rem;} .toolbar-shell{top:0;}
+}
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="wrap">
+    <div class="topbar">
+      <span class="dept"><img src="basic-education-logo.jpg" alt="Government of Uttar Pradesh"> Basic Education Department</span>
+      <span class="nipun">Foundational Literacy &amp; Numeracy
+        <img src="nipun-bharat-logo.png" alt="NIPUN Bharat" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
+        <span class="fb">NIPUN<br>BHARAT</span></span>
+    </div>
+    <div class="titlebar">
+      <div>
+        <h1>Letter Registry</h1>
+        <p>Every State &amp; District letter in one place — search, filter and open the original</p>
+      </div>
+      <div class="live"><span class="dot"></span><span id="lastUpdated">Loading…</span>
+        <button class="btn-ghost" id="refreshBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>Refresh</button>
+      </div>
+    </div>
+  </div>
+</header>
+
+<div class="toolbar-shell"><div class="wrap">
+  <div class="toolbar">
+    <div class="search" id="searchBox">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+      <input id="q" type="text" autocomplete="off" placeholder="Search letters — e.g. निपुण, पुस्तक वितरण, PTM, 1184…">
+      <button class="clear-q" id="clearQ" title="Clear search">×</button>
+    </div>
+    <div class="seg" id="segCat">
+      <button data-v="" class="on">All</button>
+      <button data-v="राज्य"><span class="sw" style="background:var(--state)"></span>State</button>
+      <button data-v="जिला"><span class="sw" style="background:var(--district)"></span>District</button>
+    </div>
+    <select class="tsel" id="selYear" aria-label="Year"><option value="">All years</option></select>
+    <button class="jump" id="jumpBtn">Letters <b id="jumpCnt">0</b> ↓</button>
+    <div class="chips-row" id="chips"></div>
+  </div>
+</div></div>
+
+<main class="wrap">
+  <div class="state-msg" id="loading"><div class="sp"></div>Loading letters…</div>
+  <div class="state-msg err hidden" id="error"></div>
+
+  <div id="dash" class="hidden">
+    <!-- KPIs -->
+    <section class="kpis">
+      <div class="kpi k-total rise" data-k="total" role="button" tabindex="0">
+        <div class="kh"><span class="kl">Total letters</span><span class="ki"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg></span></div>
+        <div class="kn" id="kTotal">0</div>
+        <div class="kf"><span class="ks" id="kTotalSub">&nbsp;</span><svg id="spark" width="90" height="28" viewBox="0 0 90 28"></svg></div>
+      </div>
+      <div class="kpi k-state rise" data-k="राज्य" role="button" tabindex="0" style="animation-delay:.05s">
+        <div class="kh"><span class="kl">From State</span><span class="ki"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 21V9l8-6 8 6v12"/><path d="M9 21v-7h6v7"/></svg></span></div>
+        <div class="kn" id="kState">0</div><span class="ks" id="kStateSub">&nbsp;</span><div class="bar"><i id="kStateBar" style="width:0"></i></div>
+      </div>
+      <div class="kpi k-district rise" data-k="जिला" role="button" tabindex="0" style="animation-delay:.1s">
+        <div class="kh"><span class="kl">From District</span><span class="ki"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 12-9 12s-9-5-9-12a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg></span></div>
+        <div class="kn" id="kDistrict">0</div><span class="ks" id="kDistrictSub">&nbsp;</span><div class="bar"><i id="kDistrictBar" style="width:0"></i></div>
+      </div>
+      <div class="kpi k-recent rise" data-k="recent" role="button" tabindex="0" style="animation-delay:.15s">
+        <div class="kh"><span class="kl">New (last 30 days)</span><span class="ki"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4"/></svg></span></div>
+        <div class="kn" id="kRecent">0</div><span class="ks">Uploaded to Drive recently</span>
+      </div>
+      <div class="kpi k-nodate rise" data-k="nodate" role="button" tabindex="0" style="animation-delay:.2s">
+        <div class="kh"><span class="kl">Date not found</span><span class="ki"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg></span></div>
+        <div class="kn" id="kNoDate">0</div><span class="ks">Fill these dates in the Sheet</span>
+      </div>
+    </section>
+
+    <!-- Row A -->
+    <section class="grid g-a">
+      <div class="card heat-card rise" style="animation-delay:.1s">
+        <div class="card-h"><div><h3>Letters Calendar</h3><p>How many letters were issued each month · darker = more · click a month to see its letters</p></div><span class="badge-i">By letter date</span></div>
+        <div class="heat" id="heat"></div>
+        <div class="heat-legend">Fewer <i style="background:var(--h1)"></i><i style="background:var(--h2)"></i><i style="background:var(--h3)"></i><i style="background:var(--h4)"></i><i style="background:var(--h5)"></i> More</div>
+      </div>
+      <div class="card rise" style="animation-delay:.15s">
+        <div class="card-h"><div><h3>State vs District</h3><p>Share of letters by issuing office · click to filter</p></div></div>
+        <div class="donut-wrap"><div class="donut" id="donut"></div><div class="dleg" id="dleg"></div></div>
+      </div>
+    </section>
+
+    <!-- Row B -->
+    <section class="grid g-b">
+      <div class="card venn-card rise" style="animation-delay:.2s">
+        <div class="card-h"><div><h3>Who Must Act?</h3><p>Letters that name BSA, BEO or Head Teachers as responsible · overlaps = shared responsibility · click a number</p></div></div>
+        <div class="venn" id="venn"></div>
+        <div class="venn-note"><span id="vennNone"></span><span>Read from the "जिम्मेदार" line of each summary</span></div>
+      </div>
+      <div class="card rise" style="animation-delay:.25s">
+        <div class="card-h"><div><h3>Topics</h3><p>What the letters are about · click to filter</p></div></div>
+        <div class="hbars" id="topics"></div>
+      </div>
+      <div class="card rise" style="animation-delay:.3s">
+        <div class="card-h"><div><h3>Released By</h3><p>Issuing officer · click to filter</p></div></div>
+        <div class="hbars" id="rels"></div>
+      </div>
+    </section>
+
+    <!-- Results -->
+    <section class="results" id="results">
+      <div class="res-h">
+        <h2>Letters <span class="cnt" id="resCnt">0</span></h2>
+        <div class="res-tools">
+          <select class="tsel" id="selMonth" aria-label="Month"><option value="">All months</option></select>
+          <select class="tsel" id="selSort" aria-label="Sort">
+            <option value="dateDesc">Newest letter date</option>
+            <option value="dateAsc">Oldest letter date</option>
+            <option value="added">Recently uploaded</option>
+          </select>
+          <div class="seg" id="segView"><button data-v="cards" class="on">Cards</button><button data-v="table">Table</button></div>
+        </div>
+      </div>
+      <div id="listBox"></div>
+      <button class="show-more hidden" id="moreBtn">Show more</button>
+    </section>
+  </div>
+</main>
+
+<div id="tip"></div>
+<footer>This dashboard updates automatically from letters added to Google Drive. For any discrepancy, please refer to the original letter from the concerned office.</footer>
+
+<script>
+/* ============ CONFIG: your Google Sheet "Publish to web" CSV link ============ */
+const SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQRsgt5n1C0o_2tKuMkQ4hULDkn7oG8-qG5geoL3q1FYywimhJPy_aQMm77DtR7uheT6w70YYJZlzg-/pub?gid=0&single=true&output=csv";
+
+const MONTHS_HI = ["जनवरी","फरवरी","मार्च","अप्रैल","मई","जून","जुलाई","अगस्त","सितंबर","अक्टूबर","नवंबर","दिसंबर"];
+const MONTHS_SHORT = ["जन","फर","मार्च","अप्रै","मई","जून","जुला","अग","सित","अक्टू","नव","दिस"];
+const MONTH_ALIASES = {"नवम्बर":"नवंबर","सितम्बर":"सितंबर","दिसम्बर":"दिसंबर","फ़रवरी":"फरवरी","अक्तूबर":"अक्टूबर"};
+const CAT_LABEL = { "राज्य":"State", "जिला":"District" };
+const DAY = 86400000, PAGE = 24;
+
+/* Topic dictionary — edit keywords here to tune the "Topics" chart */
+const TOPICS = [
+  ["NIPUN / FLN",        /निपुण|nipun|fln|बुनियादी साक्षरता/i],
+  ["Assessment / Exams", /आकलन|मूल्यांकन|परीक्षा|परिणाम|टेस्ट|\bnat\b|assessment|exam|result/i],
+  ["Training",           /प्रशिक्षण|कार्यशाला|उन्मुखीकरण|training|workshop/i],
+  ["Books & Material",   /पुस्तक|पुस्तिका|सामग्री|tlm|वितरण|किताब/i],
+  ["Meetings / PTM",     /बैठक|ptm|पैरेंट|अभिभावक|संकुल|समीक्षा/i],
+  ["Monitoring / KPI",   /kpi|अनुश्रवण|पर्यवेक्षण|निरीक्षण|मॉनिटरिंग|रोस्टर|roster/i],
+  ["Budget / Funds",     /बजट|व्यय|धनराशि|pfms|अनुदान|budget/i],
+  ["Holidays",           /अवकाश|छुट्टी|holiday/i],
+  ["Enrolment / Readiness", /नामांकन|स्कूल चलो|प्रवेश|रेडिनेस|readiness/i],
+  ["Activities",         /गतिविधि|सप्ताहांत|प्रतियोगिता|समारोह|कार्यक्रम/i]
+];
+const ROLES = [
+  { k:"BSA", label:"BSA", color:"var(--bsa)", re:/जिला बेसिक शिक्षा अधिकारी|बेसिक शिक्षा अधिकारी|बीएसए|\bBSA/i },
+  { k:"BEO", label:"BEO", color:"var(--beo)", re:/खण्ड शिक्षा अधिकारी|खंड शिक्षा अधिकारी|ख़ंड शिक्षा अधिकारी|बीईओ|\bBEO/i },
+  { k:"HM",  label:"Head Teachers / Teachers", color:"var(--hm)", re:/प्रधानाध्यापक|प्रधानाचार्य|प्रधानाचार्या|शिक्षक|अध्यापक|\bHM\b|इंचार्ज/i }
+];
+const ICON = {
+  cal:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>',
+  open:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><path d="M15 3h6v6M10 14 21 3"/></svg>'
+};
+
+/* ---------------- STATE ---------------- */
+let ROWS = [];
+const F = { q:"", cat:"", year:"", month:"", rel:"", topic:"", venn:"", special:"" };
+let SORT = "dateDesc", VIEW = "cards", SHOWN = PAGE;
+const $ = (id) => document.getElementById(id);
+
+/* ---------------- LOAD ---------------- */
+async function loadData(){
+  $("refreshBtn").classList.add("spinning");
+  try{
+    const res = await fetch(SHEET_CSV_URL + (SHEET_CSV_URL.includes("?") ? "&" : "?") + "t=" + Date.now());
+    if(!res.ok) throw new Error("HTTP " + res.status);
+    const text = await res.text();
+    if(/^\s*<(!doctype|html)/i.test(text)) throw new Error("The link returned a web page, not CSV. In Publish to web, choose \"Comma-separated values (.csv)\" and make sure the Sheet is still published.");
+    const parsed = Papa.parse(text, { header:true, skipEmptyLines:true, transformHeader: h => h.replace(/^﻿/, "").trim() });
+    const cols = parsed.meta.fields || [];
+    if(cols.indexOf("Category") === -1 || cols.indexOf("Subject") === -1)
+      throw new Error("The link is pointing to the wrong tab. Columns found: [" + cols.slice(0, 8).join(", ") + "]. Publish the \"पत्र डेटा\" tab.");
+    ROWS = parsed.data.filter(r => r.Category && (r.Subject || r.FileName)).map(cleanRow);
+    if(!ROWS.length) throw new Error("The tab was found but has no letter rows yet.");
+    $("loading").classList.add("hidden"); $("error").classList.add("hidden"); $("dash").classList.remove("hidden");
+    buildYearOptions();
+    render();
+  }catch(err){
+    $("loading").classList.add("hidden");
+    $("error").classList.remove("hidden");
+    $("error").innerHTML = "<b>Could not load the list of letters.</b><br><br>Please check that the Google Sheet is published via \"Publish to web\" and that you are online.<br><small>" + esc(err.message || String(err)) + "</small>";
+  }finally{
+    $("refreshBtn").classList.remove("spinning");
+    $("lastUpdated").textContent = "Updated " + new Date().toLocaleString("en-IN", { dateStyle:"medium", timeStyle:"short" });
+  }
+}
+
+function cleanRow(r){
+  const row = Object.assign({}, r);
+  row.Subject = (r.Subject || "").trim() || (r.FileName || "").replace(/\.(pdf|jpe?g|png)$/i, "");
+  row.Month = MONTH_ALIASES[(r.Month || "").trim()] || (r.Month || "").trim();
+  row.Year = String(r.Year || "").replace(/\.0$/, "").trim();
+  row._date = parseIssueDate(r.IssueDate);
+  if(row._date){ row.Year = String(row._date.getFullYear()); row.Month = MONTHS_HI[row._date.getMonth()]; }
+  row._added = parseTimestamp(r.Timestamp);
+  row._rel = (r.ReleasedBy || "").trim();
+  const desc = r.Description || "";
+  const all = row.Subject + " " + desc;
+  row._topics = TOPICS.filter(t => t[1].test(all)).map(t => t[0]);
+  const resp = (desc.match(/जिम्मेदार\s*[:ः]?([\s\S]*)$/) || [null, desc])[1];
+  row._roles = ROLES.filter(x => x.re.test(resp)).map(x => x.k);
+  row._vkey = row._roles.slice().sort().join("+");
+  row._search = [row.Subject, desc, r.LetterNo, r.FileName, row._rel, r.Deadlines].join(" ").toLowerCase();
+  return row;
+}
+function parseIssueDate(s){
+  s = String(s || "").trim(); if(!s) return null;
+  let m = s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/); if(m) return vd(+m[1], +m[2], +m[3]);
+  m = s.match(/^(\d{1,2})[\/.\-](\d{1,2})[\/.\-](\d{2,4})/);
+  if(m){ const y = m[3].length === 2 ? 2000 + +m[3] : +m[3]; return vd(y, +m[2], +m[1]); }
+  return null;
+}
+function parseTimestamp(s){                 // Sheets writes M/D/YYYY in your locale
+  s = String(s || "").trim(); if(!s) return null;
+  let m = s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/); if(m) return vd(+m[1], +m[2], +m[3]);
+  m = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/); if(!m) return null;
+  const a = +m[1], b = +m[2];
+  if(a > 12) return vd(+m[3], b, a);
+  return vd(+m[3], a, b) || vd(+m[3], b, a);
+}
+function vd(y, mo, d){
+  if(mo < 1 || mo > 12 || d < 1 || d > 31 || y < 2000 || y > 2100) return null;
+  const dt = new Date(y, mo - 1, d); return dt.getMonth() === mo - 1 ? dt : null;
+}
+const fmt = (d) => String(d.getDate()).padStart(2, "0") + "/" + String(d.getMonth() + 1).padStart(2, "0") + "/" + d.getFullYear();
+const isRecent = (r, days) => r._added && Date.now() - r._added < days * DAY;
+
+/* ---------------- FILTERING (cross-filter: each chart ignores its own dimension) ---------------- */
+function match(r, skip){
+  if(F.q && skip !== "q"){ const words = F.q.toLowerCase().split(/\s+/).filter(Boolean); if(!words.every(w => r._search.includes(w))) return false; }
+  if(F.cat && skip !== "cat" && r.Category !== F.cat) return false;
+  if(F.year && skip !== "year" && r.Year !== F.year) return false;
+  if(F.month && skip !== "month" && r.Month !== F.month) return false;
+  if(F.rel && skip !== "rel" && (r._rel || "Not specified") !== F.rel) return false;
+  if(F.topic && skip !== "topic" && r._topics.indexOf(F.topic) === -1) return false;
+  if(F.venn && skip !== "venn"){
+    if(F.venn === "none"){ if(r._roles.length) return false; }
+    else if(F.venn.startsWith("set:")){ if(r._roles.indexOf(F.venn.slice(4)) === -1) return false; }
+    else if(r._vkey !== F.venn) return false;
+  }
+  if(F.special === "nodate" && skip !== "special" && r._date) return false;
+  if(F.special === "recent" && skip !== "special" && !isRecent(r, 30)) return false;
+  return true;
+}
+const rowsExcept = (dim) => ROWS.filter(r => match(r, dim));
+
+function setF(key, val, toggle = true){
+  F[key] = (toggle && F[key] === val) ? "" : val;
+  if(key === "year" && !F.year) F.month = "";
+  SHOWN = PAGE; render();
+}
+
+/* ---------------- RENDER ---------------- */
+function render(){
+  const rows = rowsExcept(null);
+  renderKpis(); renderHeat(); renderDonut(); renderVenn(); renderBars("topics"); renderBars("rels");
+  renderChips(); syncControls(); renderList(rows);
+}
+
+function renderKpis(){
+  const base = rowsExcept("special");
+  const st = base.filter(r => r.Category === "राज्य").length, di = base.length - st;
+  anim($("kTotal"), base.length); anim($("kState"), st); anim($("kDistrict"), di);
+  anim($("kRecent"), base.filter(r => isRecent(r, 30)).length);
+  anim($("kNoDate"), base.filter(r => !r._date).length);
+  const pct = (n) => base.length ? Math.round(n / base.length * 100) : 0;
+  $("kStateSub").textContent = pct(st) + "% of letters"; $("kDistrictSub").textContent = pct(di) + "% of letters";
+  $("kStateBar").style.width = pct(st) + "%"; $("kDistrictBar").style.width = pct(di) + "%";
+  // sparkline: last 12 months by letter date
+  const now = new Date(), pts = [];
+  for(let i = 11; i >= 0; i--){
+    const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+    pts.push(base.filter(r => r._date && r._date.getFullYear() === d.getFullYear() && r._date.getMonth() === d.getMonth()).length);
+  }
+  const mx = Math.max(1, ...pts);
+  const path = pts.map((v, i) => (i ? "L" : "M") + (i * 90 / 11).toFixed(1) + "," + (25 - v / mx * 21).toFixed(1)).join(" ");
+  $("spark").innerHTML = `<path d="${path} L90,28 L0,28 Z" fill="rgba(37,99,201,.12)"/><path d="${path}" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>`;
+  $("kTotalSub").textContent = pts.reduce((a, b) => a + b, 0) + " in last 12 months";
+  document.querySelectorAll(".kpi").forEach(k => {
+    const v = k.dataset.k;
+    k.classList.toggle("sel", (v === F.cat && v) || (v === F.special && v) ? true : false);
+  });
+}
+
+function renderHeat(){
+  // cells ignore the year & month filters (so you can see every month) but respect all others
+  const rows = ROWS.filter(r => r._date && matchExcept(r, ["year", "month"]));
+  const years = [...new Set(ROWS.filter(r => r._date).map(r => r._date.getFullYear()))].sort((a, b) => b - a);
+  const cnt = {}; let mx = 0;
+  rows.forEach(r => { const k = r._date.getFullYear() + "-" + r._date.getMonth(); cnt[k] = (cnt[k] || 0) + 1; mx = Math.max(mx, cnt[k]); });
+  const shade = (v) => { if(!v) return ["var(--h0)", "transparent"]; const s = Math.min(5, Math.ceil(v / mx * 5)); return ["var(--h" + s + ")", s >= 3 ? "#fff" : "var(--ink)"]; };
+  let html = `<div class="hr"><span></span>${MONTHS_SHORT.map(m => `<span class="hm">${m}</span>`).join("")}<span class="hm">Total</span></div>`;
+  years.forEach(y => {
+    let tot = 0;
+    const cells = MONTHS_HI.map((m, i) => {
+      const v = cnt[y + "-" + i] || 0; tot += v;
+      const [bg, fg] = shade(v);
+      const sel = F.year === String(y) && F.month === m;
+      return `<div class="c${v ? "" : " z"}${sel ? " sel" : ""}" style="background:${bg};color:${fg}" data-y="${y}" data-m="${m}" data-tip="<b>${m} ${y}</b><br>${v} letter${v === 1 ? "" : "s"}">${v || ""}</div>`;
+    }).join("");
+    html += `<div class="hr"><span class="hy">${y}</span>${cells}<span class="ht">${tot}</span></div>`;
+  });
+  if(!years.length) html = '<div class="empty"><b>No dated letters yet</b></div>';
+  $("heat").innerHTML = html;
+  $("heat").querySelectorAll(".c:not(.z)").forEach(c => {
+    tipOn(c);
+    c.onclick = () => {
+      if(F.year === c.dataset.y && F.month === c.dataset.m){ F.year = ""; F.month = ""; }
+      else { F.year = c.dataset.y; F.month = c.dataset.m; }
+      SHOWN = PAGE; render(); scrollToList();
+    };
+  });
+}
+function matchExcept(r, dims){
+  const saved = dims.map(d => F[d]); dims.forEach(d => F[d] = "");
+  const ok = match(r, null); dims.forEach((d, i) => F[d] = saved[i]); return ok;
+}
+
+function renderDonut(){
+  const base = rowsExcept("cat");
+  const st = base.filter(r => r.Category === "राज्य").length, di = base.filter(r => r.Category === "जिला").length, tot = st + di;
+  const R = 92, r0 = 60, cx = 110, cy = 110;
+  const arc = (a0, a1) => {
+    const p = (a, rad) => [cx + rad * Math.sin(a), cy - rad * Math.cos(a)];
+    if(a1 - a0 >= Math.PI * 2 - 1e-6) a1 = a0 + Math.PI * 2 - 1e-4;
+    const L = a1 - a0 > Math.PI ? 1 : 0, [x0, y0] = p(a0, R), [x1, y1] = p(a1, R), [x2, y2] = p(a1, r0), [x3, y3] = p(a0, r0);
+    return `M${x0},${y0} A${R},${R} 0 ${L} 1 ${x1},${y1} L${x2},${y2} A${r0},${r0} 0 ${L} 0 ${x3},${y3} Z`;
+  };
+  const gap = tot && st && di ? 0.03 : 0;
+  const aS = tot ? st / tot * Math.PI * 2 : 0;
+  let svg = `<svg width="220" height="220" viewBox="0 0 220 220">`;
+  if(!tot) svg += `<circle cx="110" cy="110" r="76" fill="none" stroke="var(--line)" stroke-width="32"/>`;
+  if(st) svg += `<path d="${arc(gap, aS - gap)}" fill="var(--state)" data-cat="राज्य" class="${F.cat && F.cat !== "राज्य" ? "dim" : ""}" data-tip="<b>State</b>: ${st} letters (${Math.round(st / tot * 100)}%)"/>`;
+  if(di) svg += `<path d="${arc(aS + gap, Math.PI * 2 - gap)}" fill="var(--district)" data-cat="जिला" class="${F.cat && F.cat !== "जिला" ? "dim" : ""}" data-tip="<b>District</b>: ${di} letters (${Math.round(di / tot * 100)}%)"/>`;
+  svg += `<text x="110" y="106" text-anchor="middle" font-size="34" font-weight="700" fill="var(--ink)" font-family="Noto Serif Devanagari, serif">${tot}</text><text x="110" y="130" text-anchor="middle" font-size="12" fill="var(--ink-3)">letters</text></svg>`;
+  $("donut").innerHTML = svg;
+  $("donut").querySelectorAll("path").forEach(p => { tipOn(p); p.onclick = () => setF("cat", p.dataset.cat); });
+  const pct = (n) => tot ? Math.round(n / tot * 100) + "%" : "0%";
+  $("dleg").innerHTML = [["राज्य", "State", st, "var(--state)"], ["जिला", "District", di, "var(--district)"]].map(([k, l, n, c]) =>
+    `<button data-cat="${k}" class="${F.cat === k ? "on" : ""}"><span class="sw" style="background:${c}"></span><span><span class="t">${l}</span><br><span class="p">${pct(n)}</span></span><span class="n">${n}</span></button>`).join("");
+  $("dleg").querySelectorAll("button").forEach(b => b.onclick = () => setF("cat", b.dataset.cat));
+}
+
+function renderVenn(){
+  const base = rowsExcept("venn");
+  const reg = {}; base.forEach(r => { reg[r._vkey] = (reg[r._vkey] || 0) + 1; });
+  const g = (k) => reg[k] || 0;
+  const setTot = (k) => base.filter(r => r._roles.indexOf(k) > -1).length;
+  const C = { BSA:[150,135], BEO:[250,135], HM:[200,215] }, R = 86;
+  const regions = [
+    ["BSA", 108, 118], ["BEO", 292, 118], ["HM", 200, 272],
+    ["BEO+BSA", 200, 104], ["BSA+HM", 150, 194], ["BEO+HM", 250, 194], ["BEO+BSA+HM", 200, 163]
+  ];
+  let s = `<svg viewBox="0 0 400 330" role="img" aria-label="Venn diagram of responsible officers">`;
+  ROLES.forEach(x => {
+    const [cx, cy] = C[x.k], on = F.venn === "set:" + x.k;
+    s += `<circle class="set" cx="${cx}" cy="${cy}" r="${R}" fill="${x.color}" fill-opacity="${on ? .32 : .16}" stroke="${x.color}" stroke-width="${on ? 3 : 2}" data-set="${x.k}" data-tip="<b>${x.label}</b><br>Named in ${setTot(x.k)} letters"/>`;
+  });
+  // set labels
+  s += `<text x="64" y="30" font-size="13" font-weight="700" fill="var(--bsa)">BSA · ${setTot("BSA")}</text>`;
+  s += `<text x="336" y="30" font-size="13" font-weight="700" fill="var(--beo)" text-anchor="end">BEO · ${setTot("BEO")}</text>`;
+  s += `<text x="200" y="324" font-size="13" font-weight="700" fill="var(--hm)" text-anchor="middle">Head Teachers / Teachers · ${setTot("HM")}</text>`;
+  regions.forEach(([k, x, y]) => {
+    const v = g(k), sel = F.venn === k;
+    const names = k.split("+").map(n => n === "HM" ? "Teachers" : n).join(" + ");
+    s += `<g class="reg${sel ? " sel" : ""}${v ? "" : " zero"}" data-k="${k}" data-tip="<b>${names}</b>${k.includes("+") ? " together" : " only"}<br>${v} letters"><circle cx="${x}" cy="${y}" r="17"/><text x="${x}" y="${y + 5}" text-anchor="middle" font-size="14" font-weight="700" fill="var(--ink)">${v}</text></g>`;
+  });
+  s += `</svg>`;
+  $("venn").innerHTML = s;
+  $("venn").querySelectorAll("circle.set").forEach(c => { tipOn(c); c.onclick = () => { setF("venn", "set:" + c.dataset.set); scrollToList(); }; });
+  $("venn").querySelectorAll(".reg").forEach(gEl => { tipOn(gEl); gEl.onclick = () => { setF("venn", gEl.dataset.k); scrollToList(); }; });
+  const none = g("");
+  $("vennNone").innerHTML = none ? `${none} letter${none === 1 ? "" : "s"} name none of these — <button id="vNone">show</button>` : "";
+  const vb = $("vNone"); if(vb) vb.onclick = () => { setF("venn", "none"); scrollToList(); };
+}
+
+function renderBars(which){
+  const isT = which === "topics";
+  const base = rowsExcept(isT ? "topic" : "rel");
+  const counts = {};
+  base.forEach(r => {
+    if(isT) (r._topics.length ? r._topics : ["Other"]).forEach(t => counts[t] = (counts[t] || 0) + 1);
+    else { const k = r._rel || "Not specified"; counts[k] = (counts[k] || 0) + 1; }
+  });
+  let items = Object.entries(counts).sort((a, b) => b[1] - a[1]);
+  if(!isT && items.length > 7){ const rest = items.slice(6).reduce((s, x) => s + x[1], 0); items = items.slice(0, 6).concat([["Others", rest]]); }
+  if(isT) items = items.slice(0, 8);
+  const mx = Math.max(1, ...items.map(x => x[1]));
+  const color = isT ? "var(--accent)" : "var(--navy-2)";
+  const cur = isT ? F.topic : F.rel;
+  $(which).innerHTML = items.length ? items.map(([k, v]) => {
+    const dis = k === "Other" || k === "Others";
+    return `<div class="hb${cur === k ? " on" : ""}${dis ? " dis" : ""}" data-k="${esc(k)}" data-tip="<b>${esc(k)}</b><br>${v} letter${v === 1 ? "" : "s"}"><span class="l">${esc(k)}</span><div class="tr"><div class="f" style="width:${v / mx * 100}%;background:${color};opacity:${cur && cur !== k ? .35 : 1}"></div></div><span class="v">${v}</span></div>`;
+  }).join("") : '<div class="empty"><b>No data</b></div>';
+  $(which).querySelectorAll(".hb:not(.dis)").forEach(b => { tipOn(b); b.onclick = () => setF(isT ? "topic" : "rel", b.dataset.k); });
+}
+
+function renderChips(){
+  const L = [];
+  if(F.q) L.push(["q", `Search: “${F.q}”`]);
+  if(F.cat) L.push(["cat", CAT_LABEL[F.cat]]);
+  if(F.year) L.push(["year", "Year " + F.year]);
+  if(F.month) L.push(["month", F.month]);
+  if(F.rel) L.push(["rel", "Released by " + F.rel]);
+  if(F.topic) L.push(["topic", "Topic: " + F.topic]);
+  if(F.venn) L.push(["venn", F.venn === "none" ? "No BSA/BEO/Teacher named" : F.venn.startsWith("set:") ? "Names " + F.venn.slice(4) : "Only " + F.venn.replace(/\+/g, " + ")]);
+  if(F.special) L.push(["special", F.special === "nodate" ? "Date not found" : "New in last 30 days"]);
+  $("chips").innerHTML = L.map(([k, t]) => `<button class="fchip" data-k="${k}">${esc(t)} <span>×</span></button>`).join("") +
+    (L.length > 1 ? `<button class="fchip clear-all" id="clearAll">Clear all</button>` : "");
+  $("chips").querySelectorAll(".fchip[data-k]").forEach(b => b.onclick = () => { F[b.dataset.k] = ""; if(b.dataset.k === "year") F.month = ""; if(b.dataset.k === "q") $("q").value = ""; SHOWN = PAGE; render(); });
+  const ca = $("clearAll"); if(ca) ca.onclick = clearAll;
+}
+
+function syncControls(){
+  document.querySelectorAll("#segCat button").forEach(b => b.classList.toggle("on", b.dataset.v === F.cat));
+  $("selYear").value = F.year;
+  const months = [...new Set(ROWS.filter(r => !F.year || r.Year === F.year).map(r => r.Month).filter(Boolean))].sort((a, b) => MONTHS_HI.indexOf(a) - MONTHS_HI.indexOf(b));
+  $("selMonth").innerHTML = '<option value="">All months</option>' + months.map(m => `<option value="${m}">${m}</option>`).join("");
+  $("selMonth").value = F.month;
+  $("searchBox").classList.toggle("has-q", !!F.q);
+}
+
+/* ---------------- LIST ---------------- */
+function sortRows(rows){
+  const t = (d) => d ? d.getTime() : null;
+  return rows.sort((a, b) => {
+    if(SORT === "added") return (t(b._added) || 0) - (t(a._added) || 0);
+    const da = t(a._date), db = t(b._date);
+    if(da === null && db === null) return (t(b._added) || 0) - (t(a._added) || 0);
+    if(da === null) return 1; if(db === null) return -1;
+    return SORT === "dateAsc" ? da - db : db - da;
+  });
+}
+function hl(text){
+  let h = esc(text);
+  if(!F.q) return h;
+  F.q.split(/\s+/).filter(w => w.length > 1).forEach(w => {
+    const re = new RegExp("(" + w.replace(/[.*+?^${}()|[\]\\]/g, "\\$&") + ")", "gi");
+    h = h.replace(re, "<mark>$1</mark>");
+  });
+  return h;
+}
+function dateHtml(r){
+  if(r._date) return `<span class="dt">${ICON.cal}${fmt(r._date)}</span>`;
+  if(r.Month && r.Year) return `<span class="dt" title="Exact date not found">${ICON.cal}${esc(r.Month)} ${esc(r.Year)}</span>`;
+  return `<span class="dt miss" title="${r._added ? "Uploaded " + fmt(r._added) : ""}">Date not on letter</span>`;
+}
+
+function renderList(all){
+  const rows = sortRows(all);
+  $("resCnt").textContent = rows.length; $("jumpCnt").textContent = rows.length;
+  const show = rows.slice(0, SHOWN);
+  const box = $("listBox");
+  if(!rows.length){
+    box.innerHTML = `<div class="empty"><b>No letters match these filters</b>Try a different word or <a href="#" id="emptyClear">clear all filters</a>.</div>`;
+    $("emptyClear").onclick = (e) => { e.preventDefault(); clearAll(); };
+    $("moreBtn").classList.add("hidden"); return;
+  }
+  if(VIEW === "cards"){
+    box.innerHTML = `<div class="list">${show.map((r, i) => {
+      const desc = r.Description || "";
+      const long = desc.length > 170 || (r.Deadlines || "").trim();
+      const roles = r._roles.map(k => { const x = ROLES.find(z => z.k === k); return `<span class="role" style="background:${x.color}">${k === "HM" ? "Teachers" : k}</span>`; }).join("");
+      return `<article class="lc" data-cat="${esc(r.Category)}" style="animation-delay:${Math.min(i, 12) * 0.025}s">
+        <div class="lc-top"><span class="ob">${CAT_LABEL[r.Category] || esc(r.Category)}</span>${r._rel ? `<span class="rb">${esc(r._rel)}</span>` : ""}${isRecent(r, 7) ? '<span class="nw">NEW</span>' : ""}${dateHtml(r)}</div>
+        <h4>${hl(r.Subject)}</h4>
+        ${r.LetterNo ? `<span class="lno">पत्रांक: ${hl(r.LetterNo)}</span>` : ""}
+        ${desc ? `<div class="desc${long ? " clamp" : ""}">${hl(desc)}</div>` : ""}
+        ${(r.Deadlines || "").trim() ? `<div class="dl hidden"><b>समय-सीमा / Deadlines</b>${esc(r.Deadlines)}</div>` : ""}
+        ${(r._topics.length || roles) ? `<div class="tags">${roles}${r._topics.slice(0, 3).map(t => `<button class="tag" data-t="${esc(t)}">#${esc(t)}</button>`).join("")}</div>` : ""}
+        <div class="lc-foot">${long ? '<button class="more">Read full summary ▾</button>' : "<span></span>"}${r.FileLink ? `<a class="view" href="${esc(r.FileLink)}" target="_blank" rel="noopener">${ICON.open} View letter</a>` : ""}</div>
+      </article>`;
+    }).join("")}</div>`;
+    box.querySelectorAll(".more").forEach(b => b.onclick = () => {
+      const c = b.closest(".lc"), d = c.querySelector(".desc"), dl = c.querySelector(".dl");
+      const open = d ? d.classList.toggle("clamp") : true; if(dl) dl.classList.toggle("hidden", open);
+      b.textContent = open ? "Read full summary ▾" : "Show less ▴";
+    });
+    box.querySelectorAll(".tag").forEach(t => t.onclick = () => setF("topic", t.dataset.t, false));
+  }else{
+    box.innerHTML = `<div class="tbl-wrap"><div class="tbl-scroll"><table><thead><tr><th>#</th><th>Office</th><th>Subject</th><th>Issue date</th><th>Brief description</th><th>Letter</th></tr></thead><tbody>${
+      show.map((r, i) => `<tr data-cat="${esc(r.Category)}"><td>${i + 1}</td><td><span class="ob" style="background:var(--lcs);color:var(--lcd)">${CAT_LABEL[r.Category] || esc(r.Category)}</span></td>
+        <td class="s">${hl(r.Subject)}${r.LetterNo ? `<br><span class="lno" style="font-weight:400;font-size:.74rem;color:var(--ink-3)">पत्रांक: ${esc(r.LetterNo)}</span>` : ""}</td>
+        <td>${dateHtml(r)}</td><td class="d">${hl(r.Description || "—")}</td>
+        <td>${r.FileLink ? `<a class="view" href="${esc(r.FileLink)}" target="_blank" rel="noopener">${ICON.open} View</a>` : "—"}</td></tr>`).join("")
+    }</tbody></table></div></div>`;
+  }
+  const left = rows.length - show.length;
+  $("moreBtn").classList.toggle("hidden", left <= 0);
+  $("moreBtn").textContent = `Show ${Math.min(left, PAGE)} more (${left} remaining)`;
+}
+
+/* ---------------- HELPERS ---------------- */
+function esc(s){ return String(s ?? "").replace(/[&<>"']/g, c => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" }[c])); }
+function anim(el, to){
+  const from = Number(el.dataset.v || 0); el.dataset.v = to; const t0 = performance.now();
+  (function step(now){ const p = Math.min(1, (now - t0) / 550); el.textContent = Math.round(from + (to - from) * (1 - Math.pow(1 - p, 3))); if(p < 1) requestAnimationFrame(step); })(t0);
+}
+const tip = $("tip");
+function tipOn(el){
+  el.addEventListener("mousemove", (e) => {
+    tip.innerHTML = el.dataset.tip; tip.classList.add("show");
+    tip.style.left = Math.min(e.clientX + 14, window.innerWidth - tip.offsetWidth - 10) + "px";
+    tip.style.top = (e.clientY + 16) + "px";
+  });
+  el.addEventListener("mouseleave", () => tip.classList.remove("show"));
+}
+function scrollToList(){ $("results").scrollIntoView({ behavior:"smooth", block:"start" }); }
+function clearAll(){ Object.keys(F).forEach(k => F[k] = ""); $("q").value = ""; SHOWN = PAGE; render(); }
+function buildYearOptions(){
+  const ys = [...new Set(ROWS.map(r => r.Year).filter(Boolean))].sort((a, b) => b - a);
+  $("selYear").innerHTML = '<option value="">All years</option>' + ys.map(y => `<option value="${y}">${y}</option>`).join("");
+}
+
+/* ---------------- EVENTS ---------------- */
+let qT;
+$("q").addEventListener("input", (e) => { clearTimeout(qT); qT = setTimeout(() => { F.q = e.target.value.trim(); SHOWN = PAGE; render(); }, 160); });
+$("q").addEventListener("keydown", (e) => { if(e.key === "Enter"){ F.q = e.target.value.trim(); render(); scrollToList(); } });
+$("clearQ").onclick = () => { $("q").value = ""; F.q = ""; render(); $("q").focus(); };
+document.querySelectorAll("#segCat button").forEach(b => b.onclick = () => { F.cat = b.dataset.v; SHOWN = PAGE; render(); });
+$("selYear").onchange = (e) => { F.year = e.target.value; F.month = ""; SHOWN = PAGE; render(); };
+$("selMonth").onchange = (e) => { F.month = e.target.value; SHOWN = PAGE; render(); };
+$("selSort").onchange = (e) => { SORT = e.target.value; render(); };
+document.querySelectorAll("#segView button").forEach(b => b.onclick = () => {
+  VIEW = b.dataset.v; document.querySelectorAll("#segView button").forEach(x => x.classList.toggle("on", x === b)); render();
+});
+$("jumpBtn").onclick = scrollToList;
+$("moreBtn").onclick = () => { SHOWN += PAGE; renderList(rowsExcept(null)); };
+document.querySelectorAll(".kpi").forEach(k => {
+  const go = () => {
+    const v = k.dataset.k;
+    if(v === "total"){ clearAll(); }
+    else if(v === "राज्य" || v === "जिला") setF("cat", v);
+    else setF("special", v);
+    scrollToList();
+  };
+  k.onclick = go; k.onkeypress = (e) => { if(e.key === "Enter") go(); };
+});
+$("refreshBtn").onclick = loadData;
+loadData();
+</script>
+</body>
+</html>
